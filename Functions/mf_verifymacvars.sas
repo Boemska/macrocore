@@ -11,10 +11,10 @@
   Returns:
   > 1
 
-  @param verifyvars (pos1) - space separated list of macro variable names
-  @param makeupcase (keyword) - set to YES to convert all variable VALUES to
+  @param verifyvars space separated list of macro variable names
+  @param makeupcase= set to YES to convert all variable VALUES to
     uppercase.
-  @param mAbort (keyword) - Abort Type.  Default is SOFT (writes error to log).
+  @param mAbort= Abort Type.  Default is SOFT (writes error to log).
     Set to any other value to call mf_abort (which can be configured to abort in
     various fashions according to context).
 

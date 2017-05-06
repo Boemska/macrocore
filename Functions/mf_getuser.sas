@@ -6,8 +6,9 @@
     &sysuserid</code>.  In a Stored Process session, <code>&sysuserid</code>
     resolves to a system account (default=sassrv) and instead there are several
     metadata username variables to choose from (_metauser, _metaperson
-    ,_username, _secureusername).  Of these, _secureusername is the most
-    consistent.  This is also scanned to remove any potential @domain extension.
+    ,_username, _secureusername).  The OS account is represented by
+    <code> _secureusername</code> whilst the metadata account is under <code>
+    _metaperson</code>.
 
         %let user= %mf_getUser();
         %put &user;
@@ -16,7 +17,7 @@
     a password change).
 
   @return sysuserid (if workspace server)
-  @return _secureusername (if stored process server)
+  @return _secureusername or _metaperson (if stored process server)
 
   @version 9.2
   @author Allan Bowe

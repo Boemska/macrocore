@@ -2,7 +2,7 @@
   @file
   @brief Returns words that are in string 1 but not in string 2
   @details  Compares two space separated strings and returns the words that are
-  in the first but not in the second.  CASE SENSITIVE!
+  in the first but not in the second.
   Usage:
 
       %let x= %mf_wordsInStr1ButNotStr2(
@@ -13,8 +13,10 @@
   returns:
   > sss bram boo
 
-  @param str1 (keyword) - string containing words to extract
-  @param makeupcase (keyword) - used to compare with the extract string
+  @param str1= string containing words to extract
+  @param str2= used to compare with the extract string
+
+  @warning CASE SENSITIVE!
 
   @version 9.2
   @author Allan Bowe

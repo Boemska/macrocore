@@ -5,13 +5,13 @@
 
 Usage:
 
-    data test;
+    data work.test;
        format str $1.  num datetime19.;
        stop;
     run;
-    %put %mf_getVarNum(libds=test, var=str);
-    %put %mf_getVarNum(libds=test, var=num);
-    %put %mf_getVarNum(libds=test, var=renegade);
+    %put %mf_getVarNum(work.test,str);
+    %put %mf_getVarNum(work.test,num);
+    %put %mf_getVarNum(work.test,renegade);
 
 returns:
 
@@ -23,15 +23,14 @@ returns:
 
   @param libds Two part dataset (or view) reference.
   @param var Variable name for which a position should be returned
-  @returns outputs variable number
 
   @author Allan Bowe
   @version 9.2
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_getVarNum(libds=sashelp.class /* two level ds name */
-      , var= /* variable name from which to return the format */
+%macro mf_getVarNum(libds /* two level ds name */
+      , var /* variable name from which to return the format */
     );
   %local dsid vnum rc;
   /* Open dataset */

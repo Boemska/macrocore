@@ -4,6 +4,7 @@
   @details Queries metadata to get the libname definition then allocates the
     library directly (ie, not using the META engine).
   usage:
+
       %mm_assignDirectLib(MyLib);
       data x; set mylib.sometable; run;
 
@@ -14,10 +15,10 @@
       quit;
 
   @param libref the libref (not name) of the metadata library
-  @param open_passthrough provide an alias to produce the CONNECT TO statement
+  @param open_passthrough= provide an alias to produce the CONNECT TO statement
     for the relevant external database
-  @param sql_options an override default output fileref to avoid naming clash
-  @param mDebug set to anything but * or 0 to show debug messages in the log
+  @param sql_options= an override default output fileref to avoid naming clash
+  @param mDebug= set to anything but * or 0 to show debug messages in the log
 
   @returns libname statement
 

@@ -2,7 +2,7 @@
   @file
   @brief Returns the format of a variable
   @details Uses varfmt function to identify the format of a particular variable.
-    Usage:
+  Usage:
 
       data test;
          format str $1.  num datetime19.;
@@ -13,9 +13,10 @@
       %put %mf_getVarFormat(test,renegade);
 
   returns:
-  > $1.
-  > DATETIME19.
-  > NOTE: Variable renegade does not exist in test
+
+      $1.
+      DATETIME19.
+      NOTE: Variable renegade does not exist in test
 
   @param libds Two part dataset (or view) reference.
   @param var Variable name for which a format should be returned

@@ -19,10 +19,9 @@
       %mp_getmaxvarlengths(sashelp.class,outds=work.myds);
 
   @param libds Two part dataset (or view) reference.
-  @param outds the output dataset to create
+  @param outds= The output dataset to create
 
   @version 9.2
-  @author Macro People Ltd
   @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/

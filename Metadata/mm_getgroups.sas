@@ -4,9 +4,10 @@
   @details Provide a metadata user to get groups for just that user, or leave
     blank to return all groups.
 
-  @param user the metadata user to return groups for
-  @param outds the dataset to create that contains the list of groups
-  @param mDebug set to anything but * or 0 to show debug messages in the log
+  @param user= the metadata user to return groups for.  Leave blank for all
+    users.
+  @param outds= the dataset to create that contains the list of groups
+  @param mDebug= set to anything but * or 0 to show debug messages in the log
 
   @returns outds  dataset containing all groups in a column named "metagroup"
    - groupuri

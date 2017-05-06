@@ -5,11 +5,12 @@
     a libname statement with the meta engine.
 
   usage:
+
       %mm_assign_lib(SOMEREF);
 
   @param libref the libref (not name) of the metadata library
-  @param mDebug set to anything but * or 0 to show debug messages in the log
-  @param mAbort (keyword) - set to anything but * or 0 to call %mf_abort().
+  @param mDebug= set to anything but * or 0 to show debug messages in the log
+  @param mAbort= set to anything but * or 0 to call %mf_abort().
 
   @returns libname statement
 

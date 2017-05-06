@@ -5,14 +5,13 @@
     also be called in macro logic (is pure macro). Can be used in open code,
     eg as follows:
 
-      %put List of Variables=%mf_getvarlist(sashelp.class);
+        %put List of Variables=%mf_getvarlist(sashelp.class);
 
   returns:
-  >List of Variables=Name Sex Age Height Weight
+  > List of Variables=Name Sex Age Height Weight
 
   @param libds Two part dataset (or view) reference.
-  @param dlm provide a delimiter (eg comma or space) to separate the vars
-  @return output returns the &dlm delimited list of variables
+  @param dlm= provide a delimiter (eg comma or space) to separate the vars
 
   @version 9.2
   @author Allan Bowe

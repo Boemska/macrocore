@@ -4,8 +4,8 @@
   @details
 
   @param group metadata group for which to bring back members
-  @param outds the dataset to create that contains the list of members
-  @param id set to yes if passing an ID rather than a group name
+  @param outds= the dataset to create that contains the list of members
+  @param id= set to yes if passing an ID rather than a group name
 
   @returns outds  dataset containing all members of the metadata group
 

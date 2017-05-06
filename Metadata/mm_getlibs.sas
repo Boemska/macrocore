@@ -7,8 +7,8 @@
   @param outds the dataset to create that contains the list of libraries
   @param mDebug set to anything but * or 0 to show debug messages in the log
 
-  @returns outds  dataset containing all groups in a column named "metagroup".
-    The following columns are provided:
+  @returns outds  dataset containing all groups in a column named "metagroup"
+    (defaults to work.mm_getlibs). The following columns are provided:
     - LibraryId
     - LibraryName
     - LibraryRef

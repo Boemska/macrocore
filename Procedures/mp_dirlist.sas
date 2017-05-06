@@ -1,15 +1,15 @@
 /**
   @file
   @brief Returns all files and subdirectories within a specified parent
-  @details not OS specific (uses dopen / dread).  It does not appear to be
+  @details Not OS specific (uses dopen / dread).  It does not appear to be
     possible to reliably identify unix directories, and so a recursive
     option is not available.
   usage:
 
       %mp_dirlist(path=/some/location,outds=myTable);
 
-  @param path for which to return contents
-  @param outds the output dataset to create
+  @param path= for which to return contents
+  @param outds= the output dataset to create
 
   @returns outds contains the following variables:
    - file_or_folder (file / folder)
