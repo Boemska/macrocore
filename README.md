@@ -1,6 +1,6 @@
-# mpcore - production quality SAS Macros
+# mpcore
 
-Much quality.  Many standards.  The **mpcore** library exists to save time and development effort!  Contributions are welcomed.
+Much quality.  Many standards.  The **mpcore** library exists to save time and development effort!  Here you will find a veritable host of production quality SAS macros. Contributions are welcomed.
 
 # Components
 
@@ -77,6 +77,3 @@ All macros must be documented in the doxygen format.
 
 * All macros should be compatible with SAS from support level B and above (so currently 9.2 and later)
 
-# Release Strategy
-
-The *master* branch always contains the latest stable release.  If a change is made that could break a previous release (avoided unless absolutely necessary), then a new major version number is issued, and release notes are updated.
