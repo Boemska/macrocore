@@ -1,6 +1,6 @@
 # mpcore
 
-Much quality.  Many standards.  The **mpcore** library exists to save time and development effort!  Here you will find a veritable host of production quality SAS macros. Contributions are welcomed.
+Much quality.  Many standards.  The **mpcore** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. Contributions are welcomed.
 
 # Components
 
