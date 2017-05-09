@@ -23,10 +23,11 @@
   );
   %local dsid rc;
   %let dsid=%sysfunc(open(&libds,is));
-  %if &dsid = 0 %then
+  %if &dsid = 0 %then %do;
     %put WARNING: Cannot open %trim(&libds), system message below;
     %put %sysfunc(sysmsg());
     -1
+  %end;
   %else %do;
     %sysfunc(attrn(&dsid,&attr))
     %let rc=%sysfunc(close(&dsid));
