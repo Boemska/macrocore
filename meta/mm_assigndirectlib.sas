@@ -18,7 +18,7 @@
   @param open_passthrough= provide an alias to produce the CONNECT TO statement
     for the relevant external database
   @param sql_options= an override default output fileref to avoid naming clash
-  @param mDebug= set to anything but * or 0 to show debug messages in the log
+  @param mDebug= set to anything but 0 to show debug messages in the log
 
   @returns libname statement
 
@@ -40,7 +40,7 @@
   );
 
 %if &mDebug=0 %then %let mDebug=%str(*);
-%else %if %str(&mDebug) ne %str(*) %then %let mDebug=;
+%else %let mDebug=;
 
 %&mDebug.put NOTE: Creating direct (non META) connection to &libref library;
 

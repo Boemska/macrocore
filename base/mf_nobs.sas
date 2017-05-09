@@ -11,11 +11,12 @@
   @return output returns result of the attrn value supplied, or log message
     if error.
 
+
   @version 9.2
   @author Allan Bowe
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_nobs(libds);
-  %mf_getattrn(&libds,NLOBS);
+%macro mf_nobs(libds;
+  %mf_getattrn(&libds,NLOBS)
 %mend;
