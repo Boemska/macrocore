@@ -1,6 +1,6 @@
-# Macro Core
+# MP Core
 
-Much quality.  Many standards.  The **Macro Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/macropeople/macrocore) are welcomed.
+Much quality.  Many standards.  The **MP Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/macropeople/mpcore) are welcomed.
 
 # Components
 
@@ -50,7 +50,7 @@ The above can be done directly in your sas program, via an autoexec, or an initi
  - no trailing empty lines
 
 ## Header Properties
-The **Macro Core** documentation is created using [doxygen](http://www.stack.nl/~dimitri/doxygen/).  A full list of attributes can be found [here](http://www.stack.nl/~dimitri/doxygen/manual/commands.html) but the following are most relevant:
+The **MP Core** documentation is created using [doxygen](http://www.stack.nl/~dimitri/doxygen/).  A full list of attributes can be found [here](http://www.stack.nl/~dimitri/doxygen/manual/commands.html) but the following are most relevant:
 
  - file.  This needs to be present in order to be recognised by doxygen.
  - brief. This is a short (one sentence) description of the macro.
