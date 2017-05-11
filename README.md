@@ -1,6 +1,6 @@
-# MP Core
+# Macro Core
 
-Much quality.  Many standards.  The **MP Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/macropeople/mpcore) are welcomed.
+Much quality.  Many standards.  The **Macro Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/macropeople/macrocore) are welcomed.
 
 # Components
 
@@ -25,8 +25,8 @@ Much quality.  Many standards.  The **MP Core** library exists to save time and 
 # Installation
 First, download the repo to a location your SAS system can access. Then update your sasautos path to include the components you wish to have available,eg:
 
-    options insert=(sasautos="/your/path/mpcore/base");
-    options insert=(sasautos="/your/path/mpcore/meta");
+    options insert=(sasautos="/your/path/macrocore/base");
+    options insert=(sasautos="/your/path/macrocore/meta");
 
 The above can be done directly in your sas program, via an autoexec, or an initialisation program.  
 
@@ -50,7 +50,7 @@ The above can be done directly in your sas program, via an autoexec, or an initi
  - no trailing empty lines
 
 ## Header Properties
-The **MP Core** documentation is created using [doxygen](http://www.stack.nl/~dimitri/doxygen/).  A full list of attributes can be found [here](http://www.stack.nl/~dimitri/doxygen/manual/commands.html) but the following are most relevant:
+The **Macro Core** documentation is created using [doxygen](http://www.stack.nl/~dimitri/doxygen/).  A full list of attributes can be found [here](http://www.stack.nl/~dimitri/doxygen/manual/commands.html) but the following are most relevant:
 
  - file.  This needs to be present in order to be recognised by doxygen.
  - brief. This is a short (one sentence) description of the macro.
