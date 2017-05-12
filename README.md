@@ -65,7 +65,7 @@ All macros must be documented in the doxygen format.
 
 ## Coding Standards
 
-*  Tab size = 2 spaces.  No tabs!
+*  Indentation = 2 spaces.  No tabs!
 *  Macro variables should not have the trailing dot (`&var` not `&var.`) unless necessary to prevent incorrect resolution
 *  The closing `%mend;` should not contain the macro name.
 *  All macros should be defined with brackets, even if no variables are needed - ie `%macro x();` not `%macro x;`
