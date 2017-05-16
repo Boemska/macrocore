@@ -5,9 +5,9 @@
     blank to return all groups.
 
   @param user= the metadata user to return groups for.  Leave blank for all
-    users.
+    groups.
   @param outds= the dataset to create that contains the list of groups
-  @param mDebug= set to anything but * or 0 to show debug messages in the log
+  @param mDebug= set to 1 to show debug messages in the log
 
   @returns outds  dataset containing all groups in a column named "metagroup"
    - groupuri
@@ -26,8 +26,8 @@
     ,mDebug=0
   );
 
-%if &mDebug=0 %then %let mDebug=%str(*);
-%else %if %str(&mDebug) ne %str(*) %then %let mDebug=;
+%if &mDebug=1 %then %let mDebug=;
+%else %let mDebug=%str(*);
 
 %&mDebug.put _all_;
 

@@ -9,8 +9,8 @@
       %mm_assign_lib(SOMEREF);
 
   @param libref the libref (not name) of the metadata library
-  @param mDebug= set to anything but * or 0 to show debug messages in the log
-  @param mAbort= set to anything but * or 0 to call %mf_abort().
+  @param mDebug= set to 1 to show debug messages in the log
+  @param mAbort= set to 1 to call %mf_abort().
 
   @returns libname statement
 
@@ -22,13 +22,13 @@
 
 %macro mm_assignlib(
      libref
-    ,mDebug=%str(*)
-    ,mAbort=%str(*)
+    ,mDebug=0
+    ,mAbort=0
   );
-%if &mDebug=0 %then %let mDebug=%str(*);
-%else %if %str(&mDebug) ne %str(*) %then %let mDebug=;
-%if &mAbort=0 %then %let mAbort=%str(*);
-%else %if %str(&mAbort) ne %str(*) %then %let mAbort=;
+%if &mDebug=1 %then %let mDebug=;
+%else %let mDebug=%str(*);
+%if &mAbort=1 %then %let mAbort=;
+%else %let mAbort=%str(*);
 
 %if %sysfunc(libref(&libref)) %then %do;
   data _null_;
