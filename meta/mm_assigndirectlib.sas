@@ -39,10 +39,13 @@
     ,mDebug=0
   );
 
-%if &mDebug=1 %then %let mDebug=;
-%else %let mDebug=%str(*);
+%local mD;
+%if &mDebug=1 %then %let mD=;
+%else %let mD=%str(*);
+%&mD.put Executing mm_assigndirectlib.sas;
+%&mD.put _local_;
 
-%&mDebug.put NOTE: Creating direct (non META) connection to &libref library;
+%&mD.put NOTE: Creating direct (non META) connection to &libref library;
 
 %if %upcase(&libref)=WORK %then %do;
   %put NOTE: We already have a direct connection to WORK :-) ;
@@ -56,14 +59,14 @@ data _null_;
   rc1=metadata_getnobj("omsobj:SASLibrary?@Libref ='&libref'",1,lib_uri);
   /* get the Engine attribute of the previous object */
   rc2=metadata_getattr(lib_uri,'Engine',engine);
-  &mDebug.put rc1= lib_uri= rc2= engine=;
+  &mD.put rc1= lib_uri= rc2= engine=;
   call symputx("liburi",lib_uri,'l');
   call symputx("engine",engine,'l');
 run;
 
 /* now obtain engine specific connection details */
 %if &engine=BASE %then %do;
-  %&mDebug.put NOTE: Retrieving BASE library path;
+  %&mD.put NOTE: Retrieving BASE library path;
   data _null_;
     length up_uri $256 path cat_path $1024;
     retain cat_path;
@@ -81,10 +84,10 @@ run;
         rc3=metadata_getnasn("&liburi",'UsingPackages',i,up_uri);
     end;
     cat_path = trim(cat_path) !! ");";
-    %&mDebug.put NOTE: Getting physical path for &libref library;
-    &mDebug.put rc3= up_uri= rc4= cat_path= path=;
-    %&mDebug.put NOTE: Libname cmd will be:;
-    %&mDebug.put libname &libref &filepath;
+    %&mD.put NOTE: Getting physical path for &libref library;
+    &mD.put rc3= up_uri= rc4= cat_path= path=;
+    %&mD.put NOTE: Libname cmd will be:;
+    %&mD.put libname &libref &filepath;
     call symputx("filepath",cat_path,'l');
   run;
 
@@ -110,10 +113,10 @@ run;
       k+1;
       rcProp = metadata_getnasn(uriCon, "Properties", k, uriProp);
     end;
-    %&mDebug.put NOTE: Getting properties for REMOTE SHARE &libref library;
-    &mDebug.put _all_;
-    %&mDebug.put NOTE: Libname cmd will be:;
-    %&mDebug.put libname &libref &engine &properties slibref=&libref;
+    %&mD.put NOTE: Getting properties for REMOTE SHARE &libref library;
+    &mD.put _all_;
+    %&mD.put NOTE: Libname cmd will be:;
+    %&mD.put libname &libref &engine &properties slibref=&libref;
     call symputx ("properties",trim(properties),'l');
   run;
 
@@ -122,7 +125,7 @@ run;
 %end;
 
 %else %if &engine=OLEDB %then %do;
-  %&mDebug.put NOTE: Retrieving OLEDB connection details;
+  %&mD.put NOTE: Retrieving OLEDB connection details;
   data _null_;
     length domain datasource provider properties schema
       connx_uri domain_uri conprop_uri lib_uri schema_uri value $256.;
@@ -132,8 +135,8 @@ run;
     /* get connection domain */
     rc1=metadata_getnasn(connx_uri,'Domain',1,domain_uri);
     rc2=metadata_getattr(domain_uri,'Name',domain);
-    &mDebug.putlog / 'NOTE: ' // 'NOTE- connection id: ' connx_uri ;
-    &mDebug.putlog 'NOTE- domain: ' domain;
+    &mD.putlog / 'NOTE: ' // 'NOTE- connection id: ' connx_uri ;
+    &mD.putlog 'NOTE- domain: ' domain;
     /* get DSN and PROVIDER from connection properties */
     i=0;
     do until (rc<0);
@@ -150,9 +153,9 @@ run;
          rc5=metadata_getattr(conprop_uri,'DefaultValue',properties);
       end;
     end;
-    &mDebug.putlog 'NOTE- dsn/provider/properties: ' /
+    &mD.putlog 'NOTE- dsn/provider/properties: ' /
                     datasource provider properties;
-    &mDebug.putlog 'NOTE- schema: ' schema // 'NOTE-';
+    &mD.putlog 'NOTE- schema: ' schema // 'NOTE-';
 
     /* get SCHEMA */
     rc6=metadata_getnasn("&liburi",'UsingPackages',1,lib_uri);
@@ -185,7 +188,7 @@ run;
   %end;
 %end;
 %else %if &engine=ODBC %then %do;
-  &mDebug.%put NOTE: Retrieving ODBC connection details;
+  &mD.%put NOTE: Retrieving ODBC connection details;
   data _null_;
     length connx_uri conprop_uri value datasource up_uri schema $256.;
     call missing (of _all_);
@@ -205,7 +208,7 @@ run;
     /* get SCHEMA */
     rc6=metadata_getnasn("&liburi",'UsingPackages',1,up_uri);
     rc7=metadata_getattr(up_uri,'SchemaName',schema);
-    &mDebug.put rc= connx_uri= rc2= conprop_uri= rc3= value= rc4= datasource=
+    &mD.put rc= connx_uri= rc2= conprop_uri= rc3= value= rc4= datasource=
       rc6= up_uri= rc7= schema=;
 
     call symputx('SQL_schema',schema,'l');

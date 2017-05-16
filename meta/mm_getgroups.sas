@@ -26,10 +26,11 @@
     ,mDebug=0
   );
 
-%if &mDebug=1 %then %let mDebug=;
-%else %let mDebug=%str(*);
-
-%&mDebug.put _all_;
+%local mD;
+%if &mDebug=1 %then %let mD=;
+%else %let mD=%str(*);
+%&mD.put Executing mm_getGroups.sas;
+%&mD.put _local_;
 
 %if %length(&user)=0 %then %do;
   data &outds (keep=groupuri groupname groupdesc);
