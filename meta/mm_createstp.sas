@@ -11,7 +11,7 @@
 
   usage:
 
-      %mm_createstp(stpname=My new STP
+      %mm_createstp(stpname=MyNewSTP
         ,filename=mySpecialProgram.sas
         ,directory=SASEnvironment/SASCode/STPs
         ,tree=/User Folders/sasdemo
@@ -29,7 +29,9 @@
       run;
 
 
-  @param stpname= Stored Process name
+  @param stpname= Stored Process name.  Avoid spaces - testing has shown that
+    the check to avoid creating multiple STPs in the same folder with the same
+    name does not work when the name contains spaces.
   @param stpdesc= Stored Process description (optional)
   @param filename= the name of the .sas program to run
   @param directory= The directory uri, or the actual path to the sas program
@@ -98,6 +100,24 @@ run;
 
 /* get tree info */
 %mm_getTree(tree=&tree, inds=&outds, outds=&outds, mDebug=&mDebug)
+
+/* check to be sure the STP does not already exist */
+data &outds;
+  length id type loc $256;
+  call missing(id,type,loc);
+  drop id type rc loc;
+  set &outds;
+  loc=cats(treepath,"/&stpname");
+  rc=metadata_pathobj(' ',loc,'StoredProcess',type,id);
+  put (_all_)(=);
+  if rc>0 then do;
+    putlog "WARNING: An STP already exists at " treepath "/&stpname.";
+    putlog "WARNING- It will not be overwritten.";
+    stop;
+  end;
+  else output;
+run;
+%if %mf_nobs(&outds)=0 %then %return;
 
 data &outds (keep=stpuri prompturi fileuri texturi);
   length stpuri prompturi fileuri texturi serveruri $256 ;
