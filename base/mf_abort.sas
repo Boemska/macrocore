@@ -6,16 +6,20 @@
     results back to the client in an STP Web App context, or completely stop
     in the case of a batch run.
 
-  @param mac (keyword) - to contain the name of the calling macro
-  @param type (keyword) - enables custom error handling to be configured
-  @param msg (keyword) - message to be returned
+  @param mac= to contain the name of the calling macro
+  @param type= enables custom error handling to be configured
+  @param msg= message to be returned
+  @param iftrue= supply a condition under which the macro should be executed.
 
   @version 9.2
   @author Macro People Ltd
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_abort(mac=, type=, msg=);
+%macro mf_abort(mac=mf_abort.sas, type=, msg=, iftrue=%str(1=1));
+
+  %if not(%eval(%unquote(&iftrue))) %then %return;
+
   %put ERROR: ///  mf_abort macro executing //;
   %if %length(&mac)>0 %then %put ERROR - called by &mac;
   %put ERROR - &msg;
@@ -27,6 +31,8 @@
       put "msg=&msg";
       put "mac=&mac";
     run;
+    filename _webout clear;
+    endsas;
   %end;
 
   %put _all_;
