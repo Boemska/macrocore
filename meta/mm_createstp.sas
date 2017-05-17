@@ -1,10 +1,10 @@
 /**
   @file
   @brief Create a type 1 Stored Process (9.2 compatible)
-  @details Before creating a Stored Process, it is first necessary to create
-    PromptGroup / File / TextStore objects.  It is also necessary to obtain
-    App Server / Directory / Folder (Tree) uris.  This macro creates a type 1
-    STP.  To upgrade this macro to work with type 2 (which can embed SAS code
+  @details This macro creates a Type 1 stored process, and also the necessary
+    PromptGroup / File / TextStore objects.  It requires the location (or uri)
+    for the App Server / Directory / Folder (Tree) objects.
+    To upgrade this macro to work with type 2 (which can embed SAS code
     and is compabitible with SAS from 9.3 onwards) then the UsageVersion should
     change to 2000000 and the TextStore object updated.  The ComputeServer
     reference will also be to ServerContext rather than LogicalServer.
@@ -74,7 +74,7 @@
 %&mD.put _local_;
 
 %mf_verifymacvars(stpname filename directory tree)
-%mp_dropmembers(%scan(&outds,2,.));
+%mp_dropmembers(%scan(&outds,2,.))
 
 /* check uris */
 data _null_;
@@ -84,7 +84,7 @@ data _null_;
 run;
 
 %if &checkdirtype ne Directory %then %do;
-  %mm_getDirectories(path=&directory,outds=&outds ,mDebug=&mDebug);
+  %mm_getDirectories(path=&directory,outds=&outds ,mDebug=&mDebug)
   %if %mf_nobs(&outds)=0 or %sysfunc(exist(&outds))=0 %then %do;
     %put WARNING: The directory object does not exist for &directory;
     %return;
@@ -97,7 +97,7 @@ run;
 %end;
 
 /* get tree info */
-%mm_getTree(tree=&tree, inds=&outds, outds=&outds, mDebug=&mDebug);
+%mm_getTree(tree=&tree, inds=&outds, outds=&outds, mDebug=&mDebug)
 
 data &outds (keep=stpuri prompturi fileuri texturi);
   length stpuri prompturi fileuri texturi serveruri $256 ;
@@ -215,10 +215,9 @@ data &outds (keep=stpuri prompturi fileuri texturi);
     fullpath=cats('_program=',treepath,"/&stpname");
     putlog "NOTE: Stored Process Created!";
     putlog "NOTE- "; putlog "NOTE-"; putlog "NOTE-" fullpath;
-     putlog "NOTE- "; putlog "NOTE-";
+    putlog "NOTE- "; putlog "NOTE-";
   end;
   output;
   stop;
 run;
 %mend;
-
