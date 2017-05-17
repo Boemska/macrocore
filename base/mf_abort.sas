@@ -20,9 +20,9 @@
 
   %if not(%eval(%unquote(&iftrue))) %then %return;
 
-  %put ERROR: ///  mf_abort macro executing //;
-  %if %length(&mac)>0 %then %put ERROR - called by &mac;
-  %put ERROR - &msg;
+  %put NOTE: ///  mf_abort macro executing //;
+  %if %length(&mac)>0 %then %put NOTE- called by &mac;
+  %put NOTE - &msg;
 
   /* Stored Process Server web app context */
   %if %symexist(_metaperson) %then %do;

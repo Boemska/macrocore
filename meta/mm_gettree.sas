@@ -63,7 +63,7 @@ data &outds;
 
   &mD.put (_all_)(=);
   drop __:;
-  output;
+  if treeuri ne "" and treepath ne "" then output;
   stop;
 run;
 %mend;

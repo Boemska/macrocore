@@ -198,9 +198,10 @@ data &outds (keep=stpuri prompturi fileuri texturi);
   rc21= METADATA_SETATTR(stpuri, 'PublicType', 'StoredProcess');
   rc22= METADATA_SETATTR(stpuri, 'TransformRole', 'StoredProcess');
   rc23= METADATA_SETATTR(stpuri, 'UsageVersion', '1000000');
+  rc24= METADATA_SETATTR(stpuri, 'Desc', "&stpdesc");
 
   /* tidy up if error */
-  if sum(of rc11-rc14) ne 0 then do;
+  if sum(of rc15-rc24) ne 0 then do;
     putlog 'WARNING: Issue creating STP.';
     if stpuri ne . then do;
       putlog '  Removing orphans: ' prompturi fileuri texturi stpuri;
