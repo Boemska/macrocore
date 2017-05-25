@@ -9,6 +9,9 @@
     change to 2000000 and the TextStore object updated.  The ComputeServer
     reference will also be to ServerContext rather than LogicalServer.
 
+    This macro is idempotent - if you run it twice, it will only create an STP
+    once.
+
   usage:
 
       %mm_createstp(stpname=MyNewSTP
