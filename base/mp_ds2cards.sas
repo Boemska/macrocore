@@ -14,8 +14,9 @@
      - explicity setting a unix LF
      - constraints / indexes etc
 
-  @param base_ds= Should be two level - eg work.blah
-  @param tgt_ds= Table to be created by the generated cards file. Optional -
+  @param base_ds= Should be two level - eg work.blah.  This is the table that
+                   is converted to a cards file.
+  @param tgt_ds= Table that the generated cards file would create. Optional -
                   if omitted, will be same as BASE_DS.
   @param cards_file= Location in which to write the (.sas) cards file
   @param maxobs= to limit output to the first <code>maxobs</code> observations
