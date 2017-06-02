@@ -1,0 +1,34 @@
+/**
+  @file
+  @brief Returns number of variables in a dataset
+  @details Useful to identify those renagade datasets that have no columns!
+
+        %put Number of Variables=%mf_getvarcount(sashelp.class);
+
+  returns:
+  > Number of Variables=4
+
+  @param libds Two part dataset (or view) reference.
+
+  @version 9.2
+  @author Allan Bowe
+  @source https://github.com/macropeople/macrocore
+  @copyright GNU GENERAL PUBLIC LICENSE v3
+**/
+
+%macro mf_getvarcount(libds);
+  /* declare local vars */
+  %local outvar dsid nvars x rc ;
+  /* open dataset in macro */
+  %let dsid=%sysfunc(open(&libds));
+
+  %if &dsid %then %do;
+    %let nvars=%sysfunc(attrn(&dsid,NVARS));;
+    %let rc=%sysfunc(close(&dsid));
+  %end;
+  %else %do;
+    %put unable to open &libds (rc=&dsid);
+    %let rc=%sysfunc(close(&dsid));
+  %end;
+  &outvar
+%mend;

@@ -35,9 +35,16 @@
    %put WARNING:  &base_ds does not exist;
    %return;
 %end;
+
 %if %index(&base_ds,.)=0 %then %let base_ds=WORK.&base_ds;
 %if (&tgt_ds = ) %then %let tgt_ds=&base_ds;
 %if %index(&tgt_ds,.)=0 %then %let tgt_ds=WORK.%scan(&base_ds,2,.);
+
+%let nvars=%mf_getvarcount(&base_ds);
+%if &nvars=0 %then %do;
+  %put WARNING:  Dataset &base_ds has no variables!  It will not be converted.;
+  %return;
+%end;
 
 %if &maxobs = max %then %let maxobs=%sysfunc(getoption(obs));
 
@@ -81,7 +88,7 @@ select dataline into: datalines separated by ',' from datalines_2;
 %let valid_from_dttm_flg = N;
 %let valid_to_dttm_flg = N;
 data _null_;
-  set datalines1 end=lastobs;
+  set datalines1 ;
 /* build attrib statement */
   if type='char' then type2='$';
   if strip(format) ne '' then format2=cats('format=',format);
@@ -107,11 +114,8 @@ data _null_;
   call symputx(cats("input_stmt_", put(_N_, 8.))
     , ifc(upcase(name) not in
       ('PROCESSED_DTTM','VALID_FROM_DTTM','VALID_TO_DTTM'), str2, ""), "L");
-
-  if lastobs then do;
-    call symputx('nvars',_N_,'L');
-  end;
 run;
+
 data _null_;
   file &cards_file. lrecl=32767 termstr=nl;
   length attrib $32767;
@@ -123,7 +127,7 @@ data _null_;
     put '********************************************************************/';
     put "data &tgt_ds ;";
     put "attrib ";
-    %do i = 1 %to &nvars.;
+    %do i = 1 %to &nvars;
       attrib=symget("attrib_stmt_&i");
       put attrib;
     %end;

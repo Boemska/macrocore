@@ -26,7 +26,7 @@
 
 /* FIRST create the cards files */
 %local x ds memlist;
-proc sql noprint;* inobs=10;
+proc sql noprint;
 select distinct lowcase(memname)
   into: memlist
   separated by ' '
