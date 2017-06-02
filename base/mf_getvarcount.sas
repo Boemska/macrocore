@@ -21,7 +21,7 @@
   %let dsid=%sysfunc(open(&libds));
   %let nvars=.;
   %if &dsid %then %do;
-    %let nvars=%sysfunc(attrn(&dsid,NVARS));;
+    %let nvars=%sysfunc(attrn(&dsid,NVARS));
     %let rc=%sysfunc(close(&dsid));
   %end;
   %else %do;
