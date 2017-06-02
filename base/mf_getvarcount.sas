@@ -17,11 +17,9 @@
 **/
 
 %macro mf_getvarcount(libds);
-  /* declare local vars */
-  %local outvar dsid nvars x rc ;
-  /* open dataset in macro */
+  %local dsid nvars rc ;
   %let dsid=%sysfunc(open(&libds));
-
+  %let nvars=.;
   %if &dsid %then %do;
     %let nvars=%sysfunc(attrn(&dsid,NVARS));;
     %let rc=%sysfunc(close(&dsid));
@@ -30,5 +28,5 @@
     %put unable to open &libds (rc=&dsid);
     %let rc=%sysfunc(close(&dsid));
   %end;
-  &outvar
+  &nvars
 %mend;
