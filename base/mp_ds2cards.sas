@@ -161,4 +161,8 @@ data _null_;
   end;
 run;
 
+%put NOTE: CARDS FILE SAVED IN:;
+%put NOTE-;%put NOTE-;
+%put NOTE- %sysfunc(dequote(&cards_file.));
+%put NOTE-;%put NOTE-;
 %mend;
