@@ -6,7 +6,8 @@
     usage:
 
     %mp_ds2cards(base_ds=sashelp.class
-        , cards_file= "C:\temp\class.sas")
+        , cards_file= "C:\temp\class.sas"
+        , maxobs=5)
 
     stuff to add
      - labelling the dataset
@@ -17,14 +18,16 @@
   @param tgt_ds= Table to be created by the generated cards file. Optional -
                   if omitted, will be same as BASE_DS.
   @param cards_file= Location in which to write the (.sas) cards file
+  @param maxobs= to limit output to the first <code>maxobs</code> observations
 
 
   @version 9.2
   @author Allan Bowe
+  @source https://github.com/macropeople/macrocore
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mp_ds2cards(base_ds=, tgt_ds= , cards_file= );
+%macro mp_ds2cards(base_ds=, tgt_ds= , cards_file= ,maxobs=max);
    %local i;
 
 %if not %sysfunc(exist(&base_ds)) %then %do;
@@ -34,6 +37,8 @@
 %if %index(&base_ds,.)=0 %then %let base_ds=WORK.&base_ds;
 %if (&tgt_ds = ) %then %let tgt_ds=&base_ds;
 %if %index(&tgt_ds,.)=0 %then %let tgt_ds=WORK.%scan(&base_ds,2,.);
+
+%if &maxobs = max %then %let maxobs=%sysfunc(getoption(obs));
 
 proc sql;
 create table datalines1 as
@@ -155,9 +160,10 @@ data _null_;
   length dataline $32767;
   dataline=catq('cqsm',&datalines);
   put dataline;
-  if lastobs then do;
+  if lastobs or _n_ ge &maxobs then do;
     put ';;;;';
     put 'run;';
+    stop;
   end;
 run;
 
