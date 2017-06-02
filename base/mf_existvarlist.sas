@@ -4,7 +4,7 @@
   @details Returns 0 if ANY of the variables do not exist, or 1 if they ALL do.
     Usage:
 
-        %put %mf_existVar(sashelp.class, age sex name dummyvar)
+        %put %mf_existVarList(sashelp.class, age sex name dummyvar)
 
   @param libds 2 part dataset or view reference
   @param varlist space separated variable names
@@ -25,8 +25,15 @@
   %let dsid=%sysfunc(open(&libds,is));
 
   %if &dsid=0 %then %do;
-    %put problem opening &libds;
+    %put WARNING:  unable to open &libds in mf_existvarlist (&dsid);
   %end;
+
+  %if %sysfunc(attrn(&dsid,NVARS))=0 %then %do;
+    %put MF_EXISTVARLIST:  No variables in &libds ;
+    0
+    %return;
+  %end;
+
   %else %do i=1 %to %sysfunc(countw(&varlist));
     %let var=%scan(&varlist,&i);
 
