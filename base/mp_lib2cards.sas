@@ -34,7 +34,7 @@ select distinct lowcase(memname)
   where upcase(libname)="%upcase(&lib)";
 %do x=1 %to %sysfunc(countw(&memlist));
    %let ds=%scan(&memlist,&x);
-   %mp_ds2cards(base_ds=&lib..&ds,tgt_ds=WORK.&ds
+   %mp_ds2cards(base_ds=&lib..&ds
       ,cards_file="&outloc/&ds..sas"
       ,maxobs=&maxobs)
 %end;
