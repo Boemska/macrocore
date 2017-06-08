@@ -24,7 +24,7 @@
 
   %if not (%mf_existds(&libds)) %then %do;
     data &libds;
-      length sysjobid $10 label $50 dttm 8.;
+      length sysjobid $10 label $128 dttm 8.;
       format dttm datetime19.3;
       call missing(of _all_);
       stop;
