@@ -32,7 +32,9 @@
   %end;
 
   proc sql;
-    insert into &libds values ("&sysjobid","&label",%sysfunc(datetime()));
+    insert into &libds values ("&sysjobid"
+        ,%sysfunc(quote(&label))
+        ,%sysfunc(datetime()));
   quit;
 
 %mend;
