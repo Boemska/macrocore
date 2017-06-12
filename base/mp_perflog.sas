@@ -24,7 +24,7 @@
 
   %if not (%mf_existds(&libds)) %then %do;
     data &libds;
-      length sysjobid $10 label $128 dttm 8.;
+      length sysjobid $10 label $256 dttm 8.;
       format dttm datetime19.3;
       call missing(of _all_);
       stop;
@@ -33,7 +33,7 @@
 
   proc sql;
     insert into &libds values ("&sysjobid"
-        ,%sysfunc(quote(&label))
+        ,%sysfunc(quote(%trim(&label)))
         ,%sysfunc(datetime()));
   quit;
 
