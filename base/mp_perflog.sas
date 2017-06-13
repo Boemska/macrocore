@@ -30,7 +30,7 @@
       stop;
     run;
   %end;
-  %put label_length=%length(%sysfunc(quote(%trim(&label))));
+
   proc sql;
     insert into &libds
       set sysjobid="&sysjobid"
