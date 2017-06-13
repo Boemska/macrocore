@@ -30,11 +30,12 @@
       stop;
     run;
   %end;
-
+  %put label_length=%length(%sysfunc(quote(%trim(&label))));
   proc sql;
-    insert into &libds values ("&sysjobid"
-        ,%sysfunc(quote(%trim(&label)))
-        ,%sysfunc(datetime()));
+    insert into &libds
+      set sysjobid="&sysjobid"
+        ,label=symget('label')
+        ,dttm=%sysfunc(datetime());
   quit;
 
 %mend;
