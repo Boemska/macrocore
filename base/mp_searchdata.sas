@@ -41,21 +41,26 @@ proc sql;
 %else %do table_num=1 %to %sysfunc(countw(&table_list,%str( )));
   %let table=%scan(&table_list,&table_num,%str( ));
   %let vars=%mf_getvarlist(&lib..&table);
-  /* build sql statement */
-  create table mpsearch.&table as select * from &lib..&table
-    where 0
- /* loop through columns */
-  %do colnum=1 %to %sysfunc(countw(&vars,%str( )));
-    %let col=%scan(&vars,&colnum,%str( ));
-    %put &col;
-    %if %mf_getvartype(&lib..&table,&col)=C %then %do;
-      /* if a char column, see if it contains the string */
-      or (&col ? "&string")
-    %end;
+  %if %length(&vars)=0 %then %do;
+    %put NO COLUMNS IN &lib..&table!  This will be skipped.;
   %end;
-  ;
-  %if %mf_nobs(mpsearch.&table)=0 %then %do;
-    drop table mpsearch.&table;
+  %else %do;
+    /* build sql statement */
+    create table mpsearch.&table as select * from &lib..&table
+      where 0
+   /* loop through columns */
+    %do colnum=1 %to %sysfunc(countw(&vars,%str( )));
+      %let col=%scan(&vars,&colnum,%str( ));
+      %put &col;
+      %if %mf_getvartype(&lib..&table,&col)=C %then %do;
+        /* if a char column, see if it contains the string */
+        or (&col ? "&string")
+      %end;
+    %end;
+    ;
+    %if %mf_nobs(mpsearch.&table)=0 %then %do;
+      drop table mpsearch.&table;
+    %end;
   %end;
 %end;
 
