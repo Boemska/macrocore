@@ -2,25 +2,7 @@
 
 Much quality.  Many standards.  The **Macro Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/macropeople/macrocore) are welcomed.
 
-# Components
-
-**Base** library
- * OS independent
- * Not metadata aware 
- * No X command
- * Prefixes:  _mf_, _mp_
-
-**Meta** library
- * OS independent
- * Metadata aware 
- * No X command
- * Prefixes: _mm_
-
-**Windows** and **Unix** libraries:
- * OS specific
- * Metadata aware 
- * X command enabled
- * Prefixes: _mw_,_mu_
+The type of macro is indicated by it's prefix (eg **mf_**) for a macro function.
 
 # Installation
 First, download the repo to a location your SAS system can access. Then update your sasautos path to include the components you wish to have available,eg:
@@ -37,11 +19,21 @@ The above can be done directly in your sas program, via an autoexec, or an initi
  - one macro per file
  - filenames must be lowercase
  - prefixes:
-   - _mf_ for macro functions (can be used in open code).
+   - _mf_ for macro functions (can be used in open code).  
+     - OS Independent (No X command)
+     - Not metadata aware
    - _mp_ for macro procedures (which generate sas code)
+     - OS Independent (No X command)
+     - Not metadata aware
    - _mm_ for metadata macros (interface with the metadata server).
+     - OS Independent (No X command)
+     - Metadata aware
    - _mw_ for macros that only work in Windows (should work in ALL versions of windows)
+     - OS Dependent (X command is ok)
+     - Metadata aware 
    - _mu_ for macros that only work in Unix type environments (should work in ALL types of unix environment)
+     - OS Dependent (X command is ok)
+     - Metadata aware
  - follow verb-noun convention 
  - unix style line endings (lf)
  - individual lines should be no more than 80 characters long
