@@ -43,6 +43,7 @@
         ,type='N'
   %end;
   ;
+
   quit;
 
 %mend;

@@ -38,7 +38,6 @@
     %let var=%scan(&varlist,&i);
 
     %if %sysfunc(varnum(&dsid,&var))=0  %then %do;
-      %put %sysfunc(sysmsg());
       %let found=&found &var;
     %end;
   %end;
