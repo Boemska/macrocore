@@ -38,5 +38,4 @@
         ,dttm=%sysfunc(datetime());
   quit;
 
-%put &=label;
 %mend;
