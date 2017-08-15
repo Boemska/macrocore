@@ -22,7 +22,7 @@
 
   @param status_cd= Use INIT for INIT and TERM for TERM events
   @param libds= Location of base table (library.dataset).  To minimise risk
-    of table locks, we recommend using a database rather than a SAS dataset.
+    of table locks, we HIGHLY recommend using a database (NOT a SAS dataset).
     THE LIBRARY SHOULD BE ASSIGNED ALREADY - eg in autoexec or earlier in the
     init program proper.
 
@@ -39,7 +39,7 @@
   data ;
     length request_dttm 8 status_cd $4 _metaperson $100 _program $500
       sysuserid $50 sysjobid $12 _sessionid $50;
-    request_dttm=%sysfunc(datetime());
+    request_dttm=datetime();
     status_cd="&status_cd";
     _METAPERSON="&_metaperson";
     _PROGRAM="&_program";
