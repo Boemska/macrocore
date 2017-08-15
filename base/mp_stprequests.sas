@@ -17,7 +17,7 @@
 
     Called via STP init / term events (configurable in SMC) as follows:
 
-    %mp_stprequests(status_cd=INIT, libds=YOURLIB )
+    %mp_stprequests(status_cd=INIT, libds=YOURLIB.DATASET )
 
 
   @param status_cd= Use INIT for INIT and TERM for TERM events
