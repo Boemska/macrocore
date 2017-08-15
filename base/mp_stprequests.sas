@@ -33,7 +33,7 @@
 **/
 
 %macro mp_stprequests(status_cd= /* $4 eg INIT or TERM */
-      libds=WORK.stp_requests /* base table location (lib should be assigned) */
+      ,libds=WORK.stp_requests /* base table location (lib should be assigned) */
   );
 
   data ;
