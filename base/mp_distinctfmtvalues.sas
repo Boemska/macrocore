@@ -46,6 +46,6 @@
     %else %do;
       put(&var,&fmt)
     %end;
-       as &outvar length=&length
+       as &outvar length=&varlen
     from &libds;
 %mend;
