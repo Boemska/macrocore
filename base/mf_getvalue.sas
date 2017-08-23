@@ -25,6 +25,6 @@
 %let rc = %sysfunc(fetch(&dsid));
 %let rc = %sysfunc(close(&dsid));
 
-    &&&variable
+    %trim(&&&variable)
 
 %mend;
