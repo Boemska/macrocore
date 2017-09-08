@@ -28,27 +28,42 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mp_ds2cards(base_ds=, tgt_ds= , cards_file= ,maxobs=max);
-   %local i;
+%macro mp_ds2cards(base_ds=, tgt_ds=
+    ,cards_file="%sysfunc(pathname(work))/cardgen.sas"
+    ,maxobs=max
+    ,random_sample=NO
+  );
+  %local i setds nvars;
 
 %if not %sysfunc(exist(&base_ds)) %then %do;
    %put WARNING:  &base_ds does not exist;
    %return;
 %end;
-
-%if %index(&base_ds,.)=0 %then %let base_ds=WORK.&base_ds;
-%if (&tgt_ds = ) %then %let tgt_ds=&base_ds;
-%if %index(&tgt_ds,.)=0 %then %let tgt_ds=WORK.%scan(&base_ds,2,.);
-
 %let nvars=%mf_getvarcount(&base_ds);
 %if &nvars=0 %then %do;
   %put WARNING:  Dataset &base_ds has no variables!  It will not be converted.;
   %return;
 %end;
 
-%if &maxobs = max %then %let maxobs=%sysfunc(getoption(obs));
+%if %index(&base_ds,.)=0 %then %let base_ds=WORK.&base_ds;
+%if (&tgt_ds = ) %then %let tgt_ds=&base_ds;
+%if %index(&tgt_ds,.)=0 %then %let tgt_ds=WORK.%scan(&base_ds,2,.);
 
-proc sql;
+
+data;run;
+%let setds=&syslast;
+proc sql
+%if %datatyp(&maxobs)=NUMERIC %then %do;
+  outobs=&maxobs;
+%end;
+  ;
+  create table &setds as select * from &base_ds
+%if &random_sample=YES %then %do;
+  order by ranuni(42)
+%end;
+  ;
+
+
 create table datalines1 as
    select name,type,length,varnum,format,label from dictionary.columns
    where libname="%upcase(%scan(&base_ds,1))"
@@ -118,7 +133,7 @@ run;
 
 data _null_;
   file &cards_file. lrecl=32767 termstr=nl;
-  length attrib $32767;
+  length __attrib $32767;
   if _n_=1 then do;
     put '/*******************************************************************';
     put " Datalines for %upcase(%scan(&base_ds,2)) dataset ";
@@ -128,8 +143,8 @@ data _null_;
     put "data &tgt_ds ;";
     put "attrib ";
     %do i = 1 %to &nvars;
-      attrib=symget("attrib_stmt_&i");
-      put attrib;
+      __attrib=symget("attrib_stmt_&i");
+      put __attrib;
     %end;
     put ";";
 
@@ -142,7 +157,7 @@ data _null_;
     %if &valid_to_dttm_flg. eq Y %then %do;
       put 'retain VALID_TO_DTTM &high_date;';
     %end;
-    if nobs=0 then do;
+    if __nobs=0 then do;
       put 'call missing(of _all_);/* avoid uninitialised notes */';
       put 'stop;';
       put 'run;';
@@ -159,18 +174,21 @@ data _null_;
       put "datalines4;";
     end;
   end;
-  set &base_ds end=lastobs nobs=nobs;
+  set &setds end=__lastobs nobs=__nobs;
 /* remove all formats for write purposes - some have long underlying decimals */
   format _numeric_ best30.29;
-  length dataline $32767;
-  dataline=catq('cqsm',&datalines);
-  put dataline;
-  if lastobs or _n_ ge &maxobs then do;
+  length __dataline $32767;
+  __dataline=catq('cqsm',&datalines);
+  put __dataline;
+  if __lastobs then do;
     put ';;;;';
     put 'run;';
     stop;
   end;
 run;
+proc sql;
+  drop table &setds;
+quit;
 
 %put NOTE: CARDS FILE SAVED IN:;
 %put NOTE-;%put NOTE-;

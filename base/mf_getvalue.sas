@@ -19,12 +19,14 @@
 **/
 
 %macro mf_getvalue(libds,variable,filter=1);
- %local dsid rc &variable;
-%let dsid=%sysfunc(open(&libds(where=(&filter))));
-%syscall set(dsid);
-%let rc = %sysfunc(fetch(&dsid));
-%let rc = %sysfunc(close(&dsid));
+ %if %mf_nobs(&libds)>0 %then %do;
+    %local dsid rc &variable;
+    %let dsid=%sysfunc(open(&libds(where=(&filter))));
+    %syscall set(dsid);
+    %let rc = %sysfunc(fetch(&dsid));
+    %let rc = %sysfunc(close(&dsid));
 
     %trim(&&&variable)
 
+  %end;
 %mend;

@@ -22,7 +22,8 @@
 
 %macro mp_lib2cards(lib=
     ,outloc=%sysfunc(pathname(work)) /* without trailing slash */
-    ,maxobs=max);
+    ,maxobs=max
+    ,random_sample=NO);
 
 /* FIRST create the cards files */
 %local x ds memlist;
@@ -36,7 +37,8 @@ select distinct lowcase(memname)
    %let ds=%scan(&memlist,&x);
    %mp_ds2cards(base_ds=&lib..&ds
       ,cards_file="&outloc/&ds..sas"
-      ,maxobs=&maxobs)
+      ,maxobs=&maxobs
+      ,random_sample=&random_sample)
 %end;
 
 %mend;
