@@ -25,7 +25,7 @@
     ,maxobs=max
     ,random_sample=NO);
 
-/* FIRST create the cards files */
+/* Find the tables */
 %local x ds memlist;
 proc sql noprint;
 select distinct lowcase(memname)
@@ -33,6 +33,11 @@ select distinct lowcase(memname)
   separated by ' '
   from dictionary.tables
   where upcase(libname)="%upcase(&lib)";
+
+/* create the output directory */
+%mf_mkdir(&outloc)
+
+/* create the cards files */
 %do x=1 %to %sysfunc(countw(&memlist));
    %let ds=%scan(&memlist,&x);
    %mp_ds2cards(base_ds=&lib..&ds
