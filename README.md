@@ -34,8 +34,9 @@ The above can be done directly in your sas program, via an autoexec, or an initi
 
 ## File Properties
  - filenames much match macro names
- - one macro per file
  - filenames must be lowercase
+ - macro names must be lowercase
+ - one macro per file
  - prefixes:
    - _mf_ for macro functions (can be used in open code).
    - _mp_ for macro procedures (which generate sas code)
