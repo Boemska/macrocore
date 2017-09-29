@@ -15,6 +15,6 @@
   %let today=%sysfunc(today(),yymmddn8.);
   %let now=%sysfunc(compress(%sysfunc(time(),time12.3),:.));
 
-  &today._&now._&sysjobid._%sysevalf(%sysfunc(ranuni(0))*1000,CEIL)
+  &today._&now._&sysjobid._%sysevalf(%sysfunc(ranuni(0))*999,CEIL)
 
 %mend;
