@@ -8,6 +8,9 @@
     %mp_zip(in=/my/file/path.txt,type=FILE,outname=myFile)
     %mp_zip(in=SOMEDS,incol=FPATH,type=DATASET,outname=myFile)
 
+  If you are sending zipped output to the _webout destination as part of an STP
+  be sure that _debug is not set (else the SPWA will send non zipped content
+  as well).
 
   @param in= unquoted filepath, dataset of files or directory to zip
   @param type= FILE, DATASET, DIRECTORY. (FILE / DATASET not ready yet)
