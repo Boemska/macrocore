@@ -21,7 +21,8 @@
 **/
 
 
-%macro mf_getquotedstr(IN_STR,DLM=%str(,),QUOTE=S);
+%macro mf_getquotedstr(IN_STR,DLM=%str(,),QUOTE=S
+)/*/STORE SOURCE*/;
   %if &quote=S %then %let quote=%str(%');
   %else %if &quote=D %then %let quote=%str(%");
   %else %let quote=%str();

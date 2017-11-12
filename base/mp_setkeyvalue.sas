@@ -19,7 +19,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mp_setkeyvalue(key,value,type=C,libds=work.mp_setkeyvalue);
+%macro mp_setkeyvalue(key,value,type=C,libds=work.mp_setkeyvalue
+)/*/STORE SOURCE*/;
 
   %if not (%mf_existds(&libds)) %then %do;
     data &libds (index=(key/unique));

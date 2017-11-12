@@ -25,7 +25,7 @@ Usage:
 
 %macro mf_getvartype(libds /* two level name */
       , var /* variable name from which to return the type */
-    );
+)/*/STORE SOURCE*/;
   %local dsid vnum vtype rc;
   /* Open dataset */
   %let dsid = %sysfunc(open(&libds));

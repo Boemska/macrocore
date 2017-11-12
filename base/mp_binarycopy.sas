@@ -25,7 +25,7 @@
     ,outloc=          /* full path and filename of object to be created */
     ,inref=____in   /* override default to use own filerefs */
     ,outref=____out /* override default to use own filerefs */
-  );
+)/*/STORE SOURCE*/;
    /* these IN and OUT filerefs can point to anything */
   %if &inref = ____in %then %do;
     filename &inref &inloc lrecl=1048576 ;

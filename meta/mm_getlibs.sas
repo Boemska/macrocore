@@ -28,7 +28,7 @@
 
 %macro mm_getlibs(
     outds=work.mm_getLibs
-  );
+)/*/STORE SOURCE*/;
 
 /*
   flags:

@@ -44,7 +44,7 @@
     ,mDebug=0
     ,showDesc=
     ,showUsageVersion=
-  );
+)/*/STORE SOURCE*/;
 
 %local mD;
 %if &mDebug=1 %then %let mD=;

@@ -31,7 +31,7 @@
   ,outpath=%sysfunc(pathname(WORK))
   ,incol=
   ,debug=NO
-);
+)/*/STORE SOURCE*/;
 
 %let type=%upcase(&type);
 %local ds;

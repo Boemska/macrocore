@@ -19,7 +19,7 @@
     group /* metadata group for which to bring back members */
     ,outds=work.mm_getgroupmembers /* output dataset to contain the results */
     ,id=NO /* set to yes if passing an ID rather than group name */
-  );
+)/*/STORE SOURCE*/;
 
   data &outds ;
     attrib uriGrp uriMem GroupId GroupName Group_or_Role MemberName MemberType

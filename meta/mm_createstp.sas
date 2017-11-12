@@ -70,7 +70,7 @@
     ,outds=work.mm_createstp
     ,mDebug=0
     ,server=SASApp - Logical Stored Process Server
-  );
+)/*/STORE SOURCE*/;
 
 %local mD;
 %if &mDebug=1 %then %let mD=;

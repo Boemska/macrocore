@@ -20,7 +20,7 @@
 %macro mf_getattrn(
      libds
     ,attr
-  );
+)/*/STORE SOURCE*/;
   %local dsid rc;
   %let dsid=%sysfunc(open(&libds,is));
   %if &dsid = 0 %then %do;

@@ -20,7 +20,7 @@
 
 %macro mf_getvarlist(libds
       ,dlm=%str( )
-  );
+)/*/STORE SOURCE*/;
   /* declare local vars */
   %local outvar dsid nvars x rc dlm;
   /* open dataset in macro */

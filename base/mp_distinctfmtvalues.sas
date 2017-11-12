@@ -25,7 +25,7 @@
     ,outvar=formatted_value
     ,outds=work.mp_distinctfmtvalues
     ,varlen=2000
-  );
+)/*/STORE SOURCE*/;
 
   %local fmt vtype;
   %let fmt=%mf_getvarformat(&libds,&var);

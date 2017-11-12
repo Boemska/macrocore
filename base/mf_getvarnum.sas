@@ -31,7 +31,7 @@ returns:
 
 %macro mf_getVarNum(libds /* two level ds name */
       , var /* variable name from which to return the format */
-    );
+)/*/STORE SOURCE*/;
   %local dsid vnum rc;
   /* Open dataset */
   %let dsid = %sysfunc(open(&libds));

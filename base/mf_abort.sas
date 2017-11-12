@@ -16,7 +16,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_abort(mac=mf_abort.sas, type=, msg=, iftrue=%str(1=1));
+%macro mf_abort(mac=mf_abort.sas, type=, msg=, iftrue=%str(1=1)
+)/*/STORE SOURCE*/;
 
   %if not(%eval(%unquote(&iftrue))) %then %return;
 

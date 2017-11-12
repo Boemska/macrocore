@@ -24,7 +24,7 @@
      path=
     ,outds=work.mm_getDirectories
     ,mDebug=0
-  );
+)/*/STORE SOURCE*/;
 
 %local mD;
 %if &mDebug=1 %then %let mD=;

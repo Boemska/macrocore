@@ -35,7 +35,7 @@
      verifyVars  /* list of macro variable NAMES */
     ,makeUpcase=NO  /* set to YES to make all the variable VALUES uppercase */
     ,mAbort=SOFT
-  );
+)/*/STORE SOURCE*/;
 
   %local verifyIterator verifyVar abortmsg;
   %do verifyIterator=1 %to %sysfunc(countw(&verifyVars,%str( )));

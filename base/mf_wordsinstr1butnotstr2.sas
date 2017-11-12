@@ -26,7 +26,7 @@
 %macro mf_wordsInStr1ButNotStr2(
     Str1= /* string containing words to extract */
    ,Str2= /* used to compare with the extract string */
-  );
+)/*/STORE SOURCE*/;
 
 %local count_base count_extr i i2 extr_word base_word match outvar;
 %let count_base=%sysfunc(countw(&Str2));

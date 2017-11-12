@@ -18,7 +18,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_getvalue(libds,variable,filter=1);
+%macro mf_getvalue(libds,variable,filter=1
+)/*/STORE SOURCE*/;
  %if %mf_nobs(&libds)>0 %then %do;
     %local dsid rc &variable;
     %let dsid=%sysfunc(open(&libds(where=(&filter))));

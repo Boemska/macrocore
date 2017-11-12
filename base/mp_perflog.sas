@@ -20,7 +20,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mp_perflog(label,libds=work.mp_perflog);
+%macro mp_perflog(label,libds=work.mp_perflog
+)/*/STORE SOURCE*/;
 
   %if not (%mf_existds(&libds)) %then %do;
     data &libds;

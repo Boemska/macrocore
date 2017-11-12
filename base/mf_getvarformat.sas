@@ -29,7 +29,7 @@
 
 %macro mf_getVarFormat(libds /* two level ds name */
       , var /* variable name from which to return the format */
-    );
+)/*/STORE SOURCE*/;
   %local dsid vnum vformat rc;
   /* Open dataset */
   %let dsid = %sysfunc(open(&libds));

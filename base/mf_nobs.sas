@@ -17,6 +17,7 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_nobs(libds);
+%macro mf_nobs(libds
+)/*/STORE SOURCE*/;
   %mf_getattrn(&libds,NLOBS)
 %mend;

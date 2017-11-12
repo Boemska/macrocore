@@ -11,7 +11,8 @@ Usage:
   @version 9.2
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
-%macro mf_mkdir(dir);
+%macro mf_mkdir(dir
+)/*/STORE SOURCE*/;
 
   %local lastchar child parent;
 

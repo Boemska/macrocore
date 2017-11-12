@@ -14,7 +14,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_existvarlist(libds, varlist );
+%macro mf_existvarlist(libds, varlist
+)/*/STORE SOURCE*/;
 
   %if %str(&libds)=%str() or %str(&varlist)=%str() %then %do;
     %mf_abort(msg=No value provided to libds(&libds) or varlist (&varlist)!

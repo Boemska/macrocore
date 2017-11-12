@@ -22,7 +22,7 @@
 %macro mp_dropmembers(
      list /* space separated list of datasets / views */
     ,libref=WORK  /* can only drop from a single library at a time */
-  );
+)/*/STORE SOURCE*/;
 
   proc datasets lib=&libref nolist;
     delete &list;

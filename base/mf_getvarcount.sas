@@ -16,7 +16,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_getvarcount(libds);
+%macro mf_getvarcount(libds
+)/*/STORE SOURCE*/;
   %local dsid nvars rc ;
   %let dsid=%sysfunc(open(&libds));
   %let nvars=.;

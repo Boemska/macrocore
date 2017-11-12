@@ -22,7 +22,7 @@
   ,type=C /* this macro will be updated to work for numeric data also */
   ,string=Jan
   ,outloc=%sysfunc(pathname(work))/mpsearch
-);
+)/*/STORE SOURCE*/;
 
 %local table_list table table_num table colnum col start_tm vars;
 %put process began at %sysfunc(datetime(),datetime19.);

@@ -29,7 +29,7 @@
 
 %macro mf_getVarLen(libds /* two level ds name */
       , var /* variable name from which to return the length */
-    );
+)/*/STORE SOURCE*/;
   %local dsid vnum vlen rc;
   /* Open dataset */
   %let dsid = %sysfunc(open(&libds));

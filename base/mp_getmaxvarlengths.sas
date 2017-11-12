@@ -29,7 +29,7 @@
 %macro mp_getmaxvarlengths(
     libds      /* libref.dataset to analyse */
    ,outds=work.mp_getmaxvarlengths /* name of output dataset to create */
-);
+)/*/STORE SOURCE*/;
 
 %local vars x var fmt;
 %let vars=%getvars(libds=&libds);

@@ -37,7 +37,7 @@
     ,sql_options= /* add any options to add to proc sql statement eg outobs=
                       (only valid for pass through) */
     ,mDebug=0
-  );
+)/*/STORE SOURCE*/;
 
 %local mD;
 %if &mDebug=1 %then %let mD=;

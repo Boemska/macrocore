@@ -24,7 +24,7 @@
      libref
     ,mDebug=0
     ,mAbort=0
-  );
+)/*/STORE SOURCE*/;
 
 %local mD;
 %if &mDebug=1 %then %let mD=;

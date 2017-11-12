@@ -23,7 +23,8 @@
 %macro mp_lib2cards(lib=
     ,outloc=%sysfunc(pathname(work)) /* without trailing slash */
     ,maxobs=max
-    ,random_sample=NO);
+    ,random_sample=NO
+)/*/STORE SOURCE*/;
 
 /* Find the tables */
 %local x ds memlist;

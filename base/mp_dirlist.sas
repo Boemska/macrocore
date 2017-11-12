@@ -26,7 +26,7 @@
 
 %macro mp_dirlist(path=%sysfunc(pathname(work))
     , outds=work.mp_dirlist
-  );
+)/*/STORE SOURCE*/;
 
 data &outds (compress=no keep=file_or_folder filepath filename ext msg);
   length filepath $500 fref $8 file_or_folder $6 filename $80 ext $20 msg $200;

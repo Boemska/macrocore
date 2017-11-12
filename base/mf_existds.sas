@@ -14,7 +14,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_existds(libds);
+%macro mf_existds(libds
+)/*/STORE SOURCE*/;
 
   %if %sysfunc(exist(&libds)) ne 1 & %sysfunc(exist(&libds,VIEW)) ne 1 %then 0;
   %else 1;

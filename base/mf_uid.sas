@@ -10,7 +10,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_uid();
+%macro mf_uid(
+)/*/STORE SOURCE*/;
   %local today now;
   %let today=%sysfunc(today(),yymmddn8.);
   %let now=%sysfunc(compress(%sysfunc(time(),time12.3),:.));

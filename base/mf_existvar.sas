@@ -16,7 +16,7 @@
 
 %macro mf_existvar(libds /* 2 part dataset name */
       , var /* variable name */
-    );
+)/*/STORE SOURCE*/;
 
   %local dsid rc;
   %let dsid=%sysfunc(open(&libds,is));

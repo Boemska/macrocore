@@ -23,7 +23,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_getEngine(libref);
+%macro mf_getEngine(libref
+)/*/STORE SOURCE*/;
   %local dsid engnum rc engine;
 
   /* in case the parameter is a libref.tablename, pull off just the libref */

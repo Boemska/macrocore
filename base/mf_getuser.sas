@@ -24,7 +24,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_getuser(type=META);
+%macro mf_getuser(type=META
+)/*/STORE SOURCE*/;
   %local user metavar;
   %if &type=OS %then %let metavar=_secureusername;
   %else %let metavar=_metaperson;

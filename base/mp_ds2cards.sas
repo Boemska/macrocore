@@ -32,7 +32,7 @@
     ,cards_file="%sysfunc(pathname(work))/cardgen.sas"
     ,maxobs=max
     ,random_sample=NO
-  );
+)/*/STORE SOURCE*/;
   %local i setds nvars;
 
 %if not %sysfunc(exist(&base_ds)) %then %do;

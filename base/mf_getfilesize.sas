@@ -25,7 +25,8 @@
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
-%macro mf_getfilesize(fpath=,libds=,format=NO);
+%macro mf_getfilesize(fpath=,libds=,format=NO
+)/*/STORE SOURCE*/;
 
   %if %length(&libds)>0 %then %do;
     %let fpath=%sysfunc(pathname(%scan(&libds,1,.)))/%scan(&libds,2,.).sas7bdat;

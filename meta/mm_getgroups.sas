@@ -24,7 +24,7 @@
      user=
     ,outds=work.mm_getGroups
     ,mDebug=0
-  );
+)/*/STORE SOURCE*/;
 
 %local mD;
 %if &mDebug=1 %then %let mD=;
