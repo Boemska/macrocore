@@ -44,7 +44,7 @@
       %let abortmsg= Variable &verifyVar is MISSING;
       %goto exit_error;
     %end;
-    %if %length(&&&verifyVar)=0 %then %do;
+    %if %length(%trim(&&&verifyVar))=0 %then %do;
       %let abortmsg= Variable &verifyVar is EMPTY;
       %goto exit_error;
     %end;
