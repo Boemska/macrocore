@@ -63,5 +63,5 @@
     stop;
   run;
 
-  proc append base=&libds data=&syslast;run;
+  proc append base=&libds data=&syslast nowarn;run;
 %mend;
