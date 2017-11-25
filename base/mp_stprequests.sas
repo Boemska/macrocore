@@ -33,12 +33,11 @@
 **/
 
 %macro mp_stprequests(status_cd= /* $4 eg INIT or TERM */
-      ,libds=WORK.stp_requests /* base table location (lib should be assigned) */
+      ,libds=somelib.stp_requests /* base table location  */
 )/*/STORE SOURCE*/;
 
   data ;
-    length request_dttm 8 status_cd $4 _metaperson $100 _program $500
-      sysuserid $50 sysjobid $12 _sessionid $50;
+    if 0 then set &libds;
     request_dttm=datetime();
     status_cd="&status_cd";
     _METAPERSON="&_metaperson";
