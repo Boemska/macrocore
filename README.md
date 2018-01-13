@@ -25,8 +25,10 @@ Much quality.  Many standards.  The **Macro Core** library exists to save time a
 # Installation
 First, download the repo to a location your SAS system can access. Then update your sasautos path to include the components you wish to have available,eg:
 
+```sas
     options insert=(sasautos="/your/path/macrocore/base");
     options insert=(sasautos="/your/path/macrocore/meta");
+```
 
 The above can be done directly in your sas program, via an autoexec, or an initialisation program.
 
