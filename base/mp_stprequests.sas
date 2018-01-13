@@ -28,13 +28,18 @@
 
   @version 9.2
   @author Allan Bowe
-  @source https://github.com/macropeople/macrocore
+  @source https://github.com/Boemska/macrocore
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mp_stprequests(status_cd= /* $4 eg INIT or TERM */
       ,libds=somelib.stp_requests /* base table location  */
 )/*/STORE SOURCE*/;
+
+  /* set nosyntaxcheck so the code runs regardless */
+  %local etls_syntaxcheck;
+  %let etls_syntaxcheck=%sysfunc(getoption(syntaxcheck));
+  options nosyntaxcheck;
 
   data ;
     if 0 then set &libds;
@@ -63,4 +68,6 @@
   run;
 
   proc append base=&libds data=&syslast nowarn;run;
+
+  options &etls_syntaxcheck;
 %mend;

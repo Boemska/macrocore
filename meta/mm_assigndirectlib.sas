@@ -23,7 +23,7 @@
   @returns libname statement
 
   @version 9.2
-  @author Macro People Ltd
+  @author Allan Bowe
   @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
@@ -223,6 +223,10 @@ run;
   %else %do;
     libname &libref ODBC DATASRC=&sql_dsn SCHEMA=&sql_schema;
   %end;
+%end;
+%else %if &engine= %then %do;
+  %put NOTE: Libref &libref is not registered in metadata;
+  %return;
 %end;
 %else %do;
   %put NOTE: Engine &engine is currently unsupported;

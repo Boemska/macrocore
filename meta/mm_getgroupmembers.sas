@@ -10,7 +10,7 @@
   @returns outds  dataset containing all members of the metadata group
 
   @version 9.2
-  @author Macro People Ltd
+  @author Allan Bowe
   @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/

@@ -14,7 +14,7 @@
   Only searches character columns!
 
   @version 9.2
-  @author Macro People Ltd
+  @author Allan Bowe
 **/
 
 %macro mp_searchdata(lib=sashelp

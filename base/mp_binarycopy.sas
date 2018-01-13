@@ -15,7 +15,6 @@
   @returns nothing
 
   @version 9.2
-  @author Macro People Ltd
   @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/

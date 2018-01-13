@@ -14,7 +14,7 @@
   @param libref= can only drop from a single library at a time
 
   @version 9.2
-  @author Macro People Ltd
+  @author Allan Bowe
   @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/

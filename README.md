@@ -1,24 +1,24 @@
 # Macro Core
 
-Much quality.  Many standards.  The **Macro Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/macropeople/macrocore) are welcomed.
+Much quality.  Many standards.  The **Macro Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/Boemska/macrocore) are welcomed.
 
 # Components
 
 **Base** library
  * OS independent
- * Not metadata aware 
+ * Not metadata aware
  * No X command
  * Prefixes:  _mf_, _mp_
 
 **Meta** library
  * OS independent
- * Metadata aware 
+ * Metadata aware
  * No X command
  * Prefixes: _mm_
 
 **Windows** and **Unix** libraries:
  * OS specific
- * Metadata aware 
+ * Metadata aware
  * X command enabled
  * Prefixes: _mw_,_mu_
 
@@ -28,7 +28,7 @@ First, download the repo to a location your SAS system can access. Then update y
     options insert=(sasautos="/your/path/macrocore/base");
     options insert=(sasautos="/your/path/macrocore/meta");
 
-The above can be done directly in your sas program, via an autoexec, or an initialisation program.  
+The above can be done directly in your sas program, via an autoexec, or an initialisation program.
 
 # Standards
 
@@ -43,7 +43,7 @@ The above can be done directly in your sas program, via an autoexec, or an initi
    - _mm_ for metadata macros (interface with the metadata server).
    - _mw_ for macros that only work in Windows (should work in ALL versions of windows)
    - _mu_ for macros that only work in Unix type environments (should work in ALL types of unix environment)
- - follow verb-noun convention 
+ - follow verb-noun convention
  - unix style line endings (lf)
  - individual lines should be no more than 80 characters long
  - UTF-8
@@ -56,7 +56,7 @@ The **Macro Core** documentation is created using [doxygen](http://www.stack.nl/
  - file.  This needs to be present in order to be recognised by doxygen.
  - brief. This is a short (one sentence) description of the macro.
  - details.  A longer description, which can contain doxygen [markdown](http://www.stack.nl/~dimitri/doxygen/manual/markdown.html).
- - param.  Name of each input param followed by a description. 
+ - param.  Name of each input param followed by a description.
  - return.  Explanation of what is returned by the macro.
  - version.  The EARLIEST SAS version in which this macro is known to work.
  - author.  Author name, contact details optional

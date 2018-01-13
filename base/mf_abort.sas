@@ -12,7 +12,7 @@
   @param iftrue= supply a condition under which the macro should be executed.
 
   @version 9.2
-  @author Macro People Ltd
+  @author Allan Bowe
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 

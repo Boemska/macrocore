@@ -15,7 +15,7 @@
 
   @version 9.2
   @author Allan Bowe
-  @source https://github.com/macropeople/macrocore
+  @source https://github.com/Boemska/macrocore
   @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
