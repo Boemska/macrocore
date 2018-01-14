@@ -1,6 +1,11 @@
 # Macro Core
 
-Much quality.  Many standards.  The **Macro Core** library exists to save time and development effort!  Herein ye shall find a veritable host of production quality SAS macros. [Contributions](https://github.com/Boemska/macrocore) are welcomed.
+Much quality.  Many standards.  The **Macro Core** library exists to save time
+and development effort!  Herein ye shall find a veritable host of production
+quality SAS macros.  These are a mix of tools, utilities, functions and code
+generators that are useful in the context of Application Development on the SAS
+platform.  [Contributions](https://github.com/Boemska/macrocore/blob/master/CONTRIBUTING.md)
+are welcomed.
 
 # Components
 
