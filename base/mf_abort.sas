@@ -33,6 +33,11 @@
       put "mac=&mac";
     run;
     filename _webout clear;
+    /* no other way to abort an STP session */
+    /* see https://blogs.sas.com/content/sgf/2017/07/28/controlling-stored-process-execution-through-request-initialization-code-injection/*/
+    data _null_;
+      abort cancel;
+    run;
     endsas;
   %end;
 
