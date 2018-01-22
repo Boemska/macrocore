@@ -27,10 +27,23 @@
 
   /* Stored Process Server web app context */
   %if %symexist(_metaperson) %then %do;
+    /* send response in Boemska h54s JSON format */
     data _null_;
       file _webout mod;
-      put "msg=&msg";
-      put "mac=&mac";
+      if symexist('usermessage') then usermessage=quote(trim(symget('usermessage')));
+      else usermessage='"blank"';
+      if symexist('logmessage') then logmessage=quote(trim(symget('logmessage')));
+      else logmessage='"blank"';
+      sasdatetime=datetime();
+      put '{"abort" : [{"MSG": "' "&msg" '","MAC": "' "&mac" '"}],';
+      put '"usermessage" : ' usermessage ',';
+      put '"logmessage" : ' logmessage ',';
+      put '"errormessage" : "aborted by mf_abort macro",';
+      put '"requestingUser" : "' "&_metauser." '",';
+      put '"requestingPerson" : "' "&_metaperson." '",';
+      put '"executingPid" : ' "&sysjobid." ',';
+      put '"sasDatetime" : ' sasdatetime ',';
+      put '"status" : "error"}';
     run;
     filename _webout clear;
     /* no other way to abort an STP session */
