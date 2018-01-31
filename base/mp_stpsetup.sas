@@ -21,7 +21,7 @@
   data _null_;
     call execute('%macro hfsheader();%mend;%macro hfsfooter();%mend;');
     call execute('%macro hfsOutDataset(one,two,three);%mend;');
-    call execute('%macro hfsGetDataset(one,two);');
+    call execute('%macro hfsGetDataset(one,two);%mend;');
   run;
 %end;
 %mend;
