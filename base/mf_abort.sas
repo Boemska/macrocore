@@ -43,7 +43,7 @@
       put '"requestingPerson" : "' "&_metaperson." '",';
       put '"executingPid" : ' "&sysjobid." ',';
       put '"sasDatetime" : ' sasdatetime ',';
-      put '"status" : "error"}';
+      put '"status" : "success"}';
     run;
     filename _webout clear;
     /* no other way to abort an STP session */
