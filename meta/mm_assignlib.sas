@@ -45,13 +45,15 @@
        call symputx('LIB',libname,'L');
     end;
     else if nobj>1 then do;
-      &mD.putlog "ERROR: More than one library with libref=&libref";
+      err="ERR"!!"OR: More than one library with libref=&libref";
+      &mD.putlog err ;
       &mAbort.call execute('%mf_abort(msg=
         ERROR: More than one library with libref='!!"&libref
         ,mac=mm_assignlib.sas)");
     end;
     else do;
-      &mD.putlog "ERROR: Library &libref not found in metadata";
+      err="ERR"!!"OR: Library &libref not found in metadata";
+      &mD.putlog err;
       &mAbort.call execute('%mf_abort(msg=ERROR: Library '!!"&libref"
         !!' not found in metadata,mac=mm_assignlib.sas)');
     end;
