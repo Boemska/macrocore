@@ -42,6 +42,7 @@
     nobj=metadata_getnobj("omsobj:SASLibrary?@Libref='&libref'",1,lib_uri);
     if nobj=1 then do;
        rc=metadata_getattr(lib_uri,"Name",LibName);
+       put (_all_)(=);
        call symputx('LIB',libname,'L');
     end;
     else if nobj>1 then do;
