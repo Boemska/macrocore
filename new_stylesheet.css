@@ -1194,8 +1194,7 @@ dl.section dd {
 
 #titlearea
 {
-	padding: 2 2 2 2px;
-	margin: 0px;
+	padding-left: 10px;
 	width: 100%;
 	border-bottom: 1px solid #5373B4;
 }
