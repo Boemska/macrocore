@@ -3,7 +3,8 @@
   @brief Create a metadata folder
   @details This macro was sourced from Paul Homes who wrote the original macro
     (mkdirmd.sas) in 2010.  Very little has changed except for the standards to
-    align with the macro core standards.  The original is described here:
+    align with the macro core standards.  Also, the version specific logic was
+    updated to work on 9.3 and 9.4.  The original is described here:
     https://platformadmin.com/blogs/paul/2010/07/mkdirmd/
 
     This macro is idempotent - if you run it twice, it will only create a folder
@@ -200,7 +201,7 @@ data _null_;
   end;
 
   * new attributes for SAS 9.2 only;
-  %if ( &SYSVER = 9.2 ) %then %do;
+  %if ( &SYSVER ge 9.2 ) %then %do;
     * tag the new tree folder with the SAS 9.2 attribute PublicType=Folder;
     rc = metadata_setattr(newFolderUri, 'PublicType', 'Folder');
     &DBG put 'DEBUG: metadata_setattr (PublicType): ' rc=;
