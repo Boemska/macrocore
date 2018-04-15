@@ -49,7 +49,7 @@
     /* no other way to abort an STP session */
     /* see https://blogs.sas.com/content/sgf/2017/07/28/controlling-stored-process-execution-through-request-initialization-code-injection/*/
     data _null_;
-      abort cancel;
+      rc = stpsrvset('program error', 0);
     run;
     endsas;
   %end;
