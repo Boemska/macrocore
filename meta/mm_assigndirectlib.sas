@@ -47,10 +47,17 @@
 
 %&mD.put NOTE: Creating direct (non META) connection to &libref library;
 
-%if %upcase(&libref)=WORK %then %do;
+%local cur_engine;
+%let cur_engine=%mf_getEngine(&libref);
+%if &cur_engine ne META and &cur_engine ne %then %do;
+  %put NOTE:  &libref already has a direct (&cur_engine) libname connection;
+  %return;
+%end;
+%else %if %upcase(&libref)=WORK %then %do;
   %put NOTE: We already have a direct connection to WORK :-) ;
   %return;
 %end;
+
 /* need to determine the library ENGINE first */
 data _null_;
   length lib_uri engine $256;
@@ -90,6 +97,7 @@ run;
     %&mD.put libname &libref &filepath;
     call symputx("filepath",cat_path,'l');
   run;
+
 
   libname &libref &filepath;
 
