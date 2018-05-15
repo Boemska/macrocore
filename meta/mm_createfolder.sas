@@ -20,6 +20,7 @@
 
   @param path= Name of the folder to create.
   @param mdebug= set DBG to 1 to disable DEBUG messages
+  @param outds= output dataset with 2 vars: folderpath and folderuri
 
   @version 9.2
   @author Allan Bowe (inspired from Paul Homes original)
@@ -30,11 +31,11 @@
 %macro mm_createfolder(path=,mDebug=0,outds=mm_createfolder);
 %local dbg;
 %if &mDebug=0 %then %let dbg=*;
-data _null_;
-  length
-    objId parentFolderObjId objType  PathComponent rootpath $200
-    folderPath walkpath newFolderUri $1000;
 
+data &outds(keep=folderPath folderuri);
+  length objId parentFolderObjId objType  PathComponent rootpath $200
+    folderPath walkpath folderuri $1000;
+  call missing (of _all_);
   folderPath = cats(symget('path'));
 
   * remove any trailing slash ;
@@ -103,9 +104,9 @@ data _null_;
 
     put / 'NOTE- Attempting to create metadata folder: ' walkpath;
     * now we can do the easy bit - creating the tree folder iself;
-    newFolderUri='';
-    rc = metadata_newobj('Tree', newFolderUri, PathComponent, '', parentFolderObjId, 'SubTrees');
-    put 'NOTE- metadata_newobj: ' rc= newFolderUri= parentFolderObjId= ;
+    folderuri='';
+    rc = metadata_newobj('Tree', folderuri, PathComponent, '', parentFolderObjId, 'SubTrees');
+    put 'NOTE- metadata_newobj: ' rc= folderuri= parentFolderObjId= ;
     if ( rc = -1 ) then do;
       put "%str(ERR)OR: failed to connect to the metadata server";
       stop;
@@ -120,7 +121,7 @@ data _null_;
     end;
 
     * tag the new tree folder with the attribute TreeType=BIP Folder;
-    rc = metadata_setattr(newFolderUri, 'TreeType', 'BIP Folder');
+    rc = metadata_setattr(folderuri, 'TreeType', 'BIP Folder');
     &dbg put 'NOTE- metadata_setattr (TreeType): ' rc= ;
     if ( rc ne 0 ) then do;
       put "%str(ERR)OR: failed to set TreeType attribute for new folder: " walkpath;
@@ -128,7 +129,7 @@ data _null_;
     end;
 
     * tag the new tree folder with the SAS 9.2 attribute PublicType=Folder;
-    rc = metadata_setattr(newFolderUri, 'PublicType', 'Folder');
+    rc = metadata_setattr(folderuri, 'PublicType', 'Folder');
     &dbg put 'NOTE- metadata_setattr (PublicType): ' rc=;
     if ( rc ne 0 ) then do;
       put "%str(ERR)OR: failed to set PublicType attribute for new folder: " walkpath;
@@ -136,7 +137,7 @@ data _null_;
     end;
 
     * tag the new tree folder with the SAS 9.2 attribute UsageVersion=1000000;
-    rc = metadata_setattr(newFolderUri, 'UsageVersion', '1000000');
+    rc = metadata_setattr(folderuri, 'UsageVersion', '1000000');
     &dbg put 'NOTE- metadata_setattr (UsageVersion): ' rc=;
     if ( rc ne 0 ) then do;
       put "%str(ERR)OR: failed to set UsageVersion attribute for new folder: " walkpath;
@@ -145,7 +146,7 @@ data _null_;
 
 
     put 'NOTE- Sucessfully created new metadata folder: ' walkpath ;
-    parentFolderObjId=newFolderUri;
+    parentFolderObjId=folderuri;
     loop_next:
     pathIndex + 1;
   end;
