@@ -1,226 +1,155 @@
 /**
   @file
   @brief Create a metadata folder
-  @details This macro was sourced from Paul Homes who wrote the original macro
-    (mkdirmd.sas) in 2010.  Very little has changed except for the standards to
-    align with the macro core standards.  Also, the version specific logic was
-    updated to work on 9.3 and 9.4.  The original is described here:
+  @details This macro was inspired by Paul Homes who wrote an early
+    version (mkdirmd.sas) in 2010. The original is described here:
     https://platformadmin.com/blogs/paul/2010/07/mkdirmd/
 
-    This macro is idempotent - if you run it twice, it will only create a folder
+    The below has been updated to work robustly in later environments
+    (9.2 onwards) and will now also create all the relevant parent
+    directories.  The macro will NOT create a new ROOT folder - not
+    because it can't, but more because that is generally not something
+    your administrator would like you to do!
+
+    The macro is idempotent - if you run it twice, it will only create a folder
     once.
 
   usage:
 
-    %mm_createfolder(name=myNewFolder,parent=/ParentFolder)
+    %mm_createfolder(path=/Tests/some folder/a/b/c/d)
 
-  As per original documentation:
+  @param path= Name of the folder to create.
+  @param mdebug= set DBG to 1 to disable DEBUG messages
 
-  Metadata server connection details should be set prior to the use of this
-  macro using the various META options (METASERVER, METAPORT, METAUSER etc.).
-
-  The parent path must be absolute, start with a forward slash (/) and end
-  with a forward slash.
-
-  It will fail with an error if any folder within the parent path does not
-  exist or is not visible to the current metadata user.
-
-  It prevents the creation of folders with duplicate names in the same
-  parent folder.
-
-  @param name= Name of the folder to create. Must be non blank.
-  @param parent= Parent folder in which to create the folder.  Must start and
-    finish with a /
-  @param dbg= set DBG to * to disable DEBUG messages
-
-  @version 9.1.3
-  @author Allan Bowe (modified from Paul Homes original)
+  @version 9.2
+  @author Allan Bowe (inspired from Paul Homes original)
   @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
-%macro mm_createfolder(name=, parent=,dbg=);
-
+%macro mm_createfolder(path=,mDebug=0,outds=mm_createfolder);
+%local dbg;
+%if &mDebug=0 %then %let dbg=*;
 data _null_;
   length
-    objId parentFolderObjId $17
-    objType folderName parentPathComponent associationName $200
-    parentPath folderPath queryUri parentFolderUri newFolderUri $1000;
+    objId parentFolderObjId objType  PathComponent rootpath $200
+    folderPath walkpath newFolderUri $1000;
 
-  folderName = cats(symget('NAME'));
-  parentPath = cats(symget('PARENT'));
+  folderPath = cats(symget('path'));
+
+  * remove any trailing slash ;
+  if ( substr(folderPath,length(folderPath),1) = '/' ) then
+    folderPath=substr(folderPath,1,length(folderPath)-1);
 
   * name must not be blank;
-  if ( folderName = '' ) then do;
-    put "%str(ERR)OR: &sysmacroname NAME parameter value must be non-blank";
+  if ( folderPath = '' ) then do;
+    put "%str(ERR)OR: &sysmacroname PATH parameter value must be non-blank";
     stop;
   end;
 
-  * parent must not be blank;
-  if ( parentPath = '' ) then do;
-    put "%str(ERR)OR: &sysmacroname PARENT parameter value must be non-blank";
+  * must have a starting slash ;
+  if ( substr(folderPath,1,1) ne '/' ) then do;
+    put "%str(ERR)OR: &sysmacroname PATH parameter value must have starting slash";
     stop;
   end;
 
-  * parent must start with a /;
-  if ( substr(parentPath,1,1) ne '/' ) then do;
-    put "%str(ERR)OR: &sysmacroname PARENT parameter value must start with a /";
+  * check if folder already exists ;
+  rc=metadata_pathobj('',cats(folderPath,"(Folder)"),"",objType,objId);
+  if rc ge 1 then do;
+    put "NOTE: Folder " folderPath " already exists!";
     stop;
   end;
 
-  * parent must end with a /;
-  if ( substr(parentPath,length(parentPath),1) ne '/' ) then do;
-    put "%str(ERR)OR: &sysmacroname PARENT parameter value must end with a /";
+  * do not create a root folder ;
+  if countc(folderPath,'/')=1 then do;
+    put "%str(ERR)OR: &sysmacroname will not create a new ROOT folder";
     stop;
   end;
 
-  folderPath = cats(parentPath, folderName);
-  put 'NOTE: Attempting to create metadata folder: ' folderPath;
+  rootpath='/'!!scan(folderPath,1,'/');
+  rc=metadata_pathobj('',cats(rootpath,"(Folder)"),"",objType,objId);
+  if rc<1 then do;
+    put "%str(ERR)OR: &sysmacroname: root folder does not exist! " rootpath;
+    put (_all_)(=);
+    stop;
+  end;
 
-  * walk the parent path looking for each folder in turn until we find the
-    immediate parent to associate the new folder with ;
-  pathIndex=1;
+  * walk the path creating (or ignoring) each folder in turn;
+  pathIndex=2;
+  parentFolderObjId=objId;
+  walkpath=rootpath;
   do until (0);
-    * get the next path component in the parent folder tree path
+    * get the next path component in the folder tree path
       (using forward slash delimiters);
-    parentPathComponent = scan(parentPath, pathIndex, '/');
+    PathComponent = scan(folderPath, pathIndex, '/');
 
-    * when the parent path component is blank we have reached the end of the
-      path and found (barring any errors) our immediate parent so we can leave
-      the loop
-    ;
-    if ( parentPathComponent eq '' ) then leave;
+    * when the path component is blank we have reached the end;
+    if ( PathComponent eq '' ) then leave;
 
-    put 'NOTE: Looking for parent path tree folder: ' parentPathComponent;
+    put 'NOTE: Looking for path tree folder: ' PathComponent;
+    walkpath=cats(walkpath,'/',PathComponent);
+    objid='';
+    rc=metadata_pathobj('',cats(walkpath,"(Folder)"),"",objType,objId);
 
-    * construct a metadata XMLSelect filter to find the current parent path component;
-    * find a Tree object with the same name as the current parent path component;
-    queryUri = cats("omsobj:Tree?*[@Name='", parentPathComponent, "']");
-    * once we get past the top level we will have a parent folder object id to
-      use as an association path filter to ensure uniqueness
-    ;
-    if ( parentFolderObjId ne '' ) then do;
-      queryUri=cats(queryUri,"[ParentTree/Tree[@Id='",parentFolderObjId,"']]");
+    if rc =1 then do;
+      put 'NOTE- Found: ' walkpath ' uri: ' objid;
+      parentFolderObjId=objid;
+      goto loop_next;
     end;
-    else do;
-      * otherwise we are dealing with a top level folder - which will have a
-        BIP Service SoftwareComponent association
-      ;
-      queryUri = cats(queryUri, "[SoftwareComponents/SoftwareComponent[@Name='BIP Service']]");
+    else if ( rc > 1 ) then do;
+      put "%str(ERR)OR: multiple matching metadata objects found for tree folder: " walkpath;
+      stop;
     end;
 
-    &DBG put 'DEBUG: ' queryUri=;
-    objType='';
-    objId='';
-    rc = metadata_resolve(queryUri, objType, objId);
-    &DBG put 'DEBUG: metadata_resolve: ' rc= objType= objId=;
-    if ( rc < 0 ) then do;
+    put / 'NOTE- Attempting to create metadata folder: ' walkpath;
+    * now we can do the easy bit - creating the tree folder iself;
+    newFolderUri='';
+    rc = metadata_newobj('Tree', newFolderUri, PathComponent, '', parentFolderObjId, 'SubTrees');
+    put 'NOTE- metadata_newobj: ' rc= newFolderUri= parentFolderObjId= ;
+    if ( rc = -1 ) then do;
       put "%str(ERR)OR: failed to connect to the metadata server";
       stop;
     end;
-    else if ( rc = 0 ) then do;
-      put "%str(ERR)OR: no matching metadata object found for tree folder: " parentPathComponent;
-      put "%str(ERR)OR: cannot create folder - invalid parent path: " parentPath;
+    else if ( rc = -2 ) then do;
+      put "%str(ERR)OR: failed to create new metadata Tree object for folder: " walkpath;
       stop;
     end;
-    else if ( rc > 1 ) then do;
-      put "%str(ERR)OR: multiple matching metadata objects found for tree folder: " parentPathComponent;
+    else if ( rc ne 0 ) then do;
+      put "%str(ERR)OR: unknown error creating new metadata Tree object for folder: " walkpath;
       stop;
     end;
 
-    parentFolderObjId = objId;
-    pathIndex + 1;
-  end;
+    * tag the new tree folder with the attribute TreeType=BIP Folder;
+    rc = metadata_setattr(newFolderUri, 'TreeType', 'BIP Folder');
+    &dbg put 'NOTE- metadata_setattr (TreeType): ' rc= ;
+    if ( rc ne 0 ) then do;
+      put "%str(ERR)OR: failed to set TreeType attribute for new folder: " walkpath;
+      stop;
+    end;
 
-  * we now know the immediate parent (from parentFolderObjId) or if
-    parentFolderObjId is blank  then it will be a root folder
-  ;
-
-  * the metadata API allows duplicate folders (with the same name) so first we
-    check to make sure a folder with the same name in the same parent folder does
-    not already exist
-  ;
-  queryUri = cats("omsobj:Tree?*[@Name='", folderName, "']");
-  * add different filter for root and non-root folder;
-  if ( parentFolderObjId ne '' ) then do;
-    queryUri = cats(queryUri, "[ParentTree/Tree[@Id='", parentFolderObjId, "']]");
-  end;
-  else do;
-    queryUri = cats(queryUri, "[SoftwareComponents/SoftwareComponent[@Name='BIP Service']]");
-  end;
-
-  &DBG put 'DEBUG: ' queryUri=;
-  objType='';
-  objId='';
-  rc = metadata_resolve(queryUri, objType, objId);
-  &DBG put 'DEBUG: metadata_resolve: ' rc= objType= objId=;
-  if ( rc < 0 ) then do;
-    put "%str(ERR)OR: unable to check uniqueness of new folder name";
-    stop;
-  end;
-  else if ( rc > 0 ) then do;
-    put "%str(ERR)OR: cannot create tree folder - it already exists: " folderPath;
-    stop;
-  end;
-
-  * now we can do the easy bit - creating the tree folder iself;
-  newFolderUri='';
-  * root folder has BIP Service SoftwareComponent as a parent whereas
-    non-root folder has the previously identitied Tree object as a parent
-  ;
-  if ( parentFolderObjId = '' ) then do;
-    associationName = 'SoftwareTrees';
-    parentFolderUri = "omsobj:SoftwareComponent?SoftwareComponent[@Name='BIP Service']";
-  end;
-  else do;
-    associationName = 'SubTrees';
-    parentFolderUri = cats("omsobj:Tree\", parentFolderObjId);
-  end;
-
-  rc = metadata_newobj("Tree", newFolderUri, folderName, '', parentFolderUri, associationName);
-  &DBG put 'DEBUG: metadata_newobj: ' rc= newFolderUri= parentFolderUri= associationName=;
-  if ( rc = -1 ) then do;
-    put "%str(ERR)OR: failed to connect to the metadata server";
-    stop;
-  end;
-  else if ( rc = -2 ) then do;
-    put "%str(ERR)OR: failed to create new metadata Tree object for folder: " folderPath;
-    stop;
-  end;
-  else if ( rc ne 0 ) then do;
-    put "%str(ERR)OR: unknown error creating new metadata Tree object for folder: " folderPath;
-    stop;
-  end;
-
-  * tag the new tree folder with the attribute TreeType=BIP Folder;
-  rc = metadata_setattr(newFolderUri, 'TreeType', 'BIP Folder');
-  &DBG put 'DEBUG: metadata_setattr (TreeType): ' rc=;
-  if ( rc ne 0 ) then do;
-    put "%str(ERR)OR: failed to set TreeType attribute for new folder: " folderPath;
-    stop;
-  end;
-
-  * new attributes for SAS 9.2 only;
-  %if ( &SYSVER ge 9.2 ) %then %do;
     * tag the new tree folder with the SAS 9.2 attribute PublicType=Folder;
     rc = metadata_setattr(newFolderUri, 'PublicType', 'Folder');
-    &DBG put 'DEBUG: metadata_setattr (PublicType): ' rc=;
+    &dbg put 'NOTE- metadata_setattr (PublicType): ' rc=;
     if ( rc ne 0 ) then do;
-      put "%str(ERR)OR: failed to set PublicType attribute for new folder: " folderPath;
+      put "%str(ERR)OR: failed to set PublicType attribute for new folder: " walkpath;
       stop;
     end;
 
     * tag the new tree folder with the SAS 9.2 attribute UsageVersion=1000000;
     rc = metadata_setattr(newFolderUri, 'UsageVersion', '1000000');
-    &DBG put 'DEBUG: metadata_setattr (UsageVersion): ' rc=;
+    &dbg put 'NOTE- metadata_setattr (UsageVersion): ' rc=;
     if ( rc ne 0 ) then do;
-      put "%str(ERR)OR: failed to set UsageVersion attribute for new folder: " folderPath;
+      put "%str(ERR)OR: failed to set UsageVersion attribute for new folder: " walkpath;
       stop;
     end;
-  %end;
 
-  put 'NOTE: Sucessfully created new metadata folder: ' folderPath;
 
+    put 'NOTE- Sucessfully created new metadata folder: ' walkpath ;
+    parentFolderObjId=newFolderUri;
+    loop_next:
+    pathIndex + 1;
+  end;
+  &dbg put (_all_)(=);
 run;
 
 %mend;
