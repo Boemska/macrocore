@@ -19,6 +19,7 @@
     for the relevant external database
   @param sql_options= an override default output fileref to avoid naming clash
   @param mDebug= set to 1 to show debug messages in the log
+  @param mAbort= set to 1 to call %mf_abort().
 
   @returns libname statement
 
@@ -37,6 +38,7 @@
     ,sql_options= /* add any options to add to proc sql statement eg outobs=
                       (only valid for pass through) */
     ,mDebug=0
+    ,mAbort=0
 )/*/STORE SOURCE*/;
 
 %local mD;
@@ -44,6 +46,9 @@
 %else %let mD=%str(*);
 %&mD.put Executing mm_assigndirectlib.sas;
 %&mD.put _local_;
+
+%if &mAbort=1 %then %let mAbort=;
+%else %let mAbort=%str(*);
 
 %&mD.put NOTE: Creating direct (non META) connection to &libref library;
 
@@ -234,6 +239,9 @@ run;
 %end;
 %else %if &engine= %then %do;
   %put NOTE: Libref &libref is not registered in metadata;
+  %&mAbort.mf_abort(
+    msg=ERROR: Libref &libref is not registered in metadata
+    ,mac=mm_assigndirectlib.sas);
   %return;
 %end;
 %else %do;
