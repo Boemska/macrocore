@@ -52,7 +52,7 @@
     end;
     else do;
       call symputx('mf_abort',1);
-      call symputx('msg',"Library &libref not found in metadata";
+      call symputx('msg',"Library &libref not found in metadata");
     end;
   run;
   %mf_abort(iftrue= (&mf_abort=1)
