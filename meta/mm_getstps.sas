@@ -59,8 +59,8 @@ run;
 
 %if %length(&tree)>0 %then %do;
   /* get tree info */
-  %mm_getTree(tree=&tree,inds=&outds, outds=&outds, mDebug=&mDebug)
-  %if %mf_nobs(&outds)=0 %then %do;
+  %mm_gettree(tree=&tree,inds=&outds, outds=&outds, mDebug=&mDebug)
+    %if %mf_nobs(&outds)=0 %then %do;
     %put NOTE:  Tree &tree did not exist!!;
     %return;
   %end;
