@@ -50,9 +50,13 @@ data _null_;
       cnt+1;
     end;
   end;
+  else put (_all_)(=);
 run;
 
-%if &tsuri=stopifempty %then %return;
+%if &tsuri=stopifempty %then %do;
+  %put WARNING:  &stp.(StoredProcess) not found!;
+  %return;
+%end;
 
 filename &frefin temp;
 
@@ -78,7 +82,7 @@ run;
     outstr=tranwrd(outstr,'"','&quot;');
     outstr=tranwrd(outstr,'0A'x,'&#10;');
     outstr=tranwrd(outstr,'0D'x,'&#13;');
-    put outstr;
+    put outstr '&#10;';
   run;
 %end;
 
