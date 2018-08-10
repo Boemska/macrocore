@@ -39,6 +39,8 @@
     %let i = %eval(&i+1);
   %end;
 
+  %let buffer=%sysfunc(coalescec(%qtrim(&buffer),&QUOTE&QUOTE));
+
   &buffer
 
 %mend;

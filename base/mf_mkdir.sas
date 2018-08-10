@@ -47,7 +47,7 @@ Usage:
 
     %if (%length(&dir) gt %length(&child)) %then %do;
        %let parent = %substr(&dir, 1, %length(&dir)-%length(&child));
-       %mf_mkdir(&parent);
+       %mf_mkdir(&parent)
     %end;
 
     /*
@@ -56,7 +56,7 @@ Usage:
 
     %let dname = %sysfunc(dcreate(&child, &parent));
     %if (%bquote(&dname) eq ) %then %do;
-       %put ERROR: could not create &parent\&child;
+       %put ERROR: could not create &parent + &child;
        %abort cancel;
     %end;
     %else %do;

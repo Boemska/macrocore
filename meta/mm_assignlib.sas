@@ -36,32 +36,32 @@
 %else %let mAbort=%str(*);
 
 %if %sysfunc(libref(&libref)) %then %do;
+  %local mf_abort msg; %let mf_abort=0;
   data _null_;
     length lib_uri LibName $200;
     call missing(of _all_);
     nobj=metadata_getnobj("omsobj:SASLibrary?@Libref='&libref'",1,lib_uri);
     if nobj=1 then do;
        rc=metadata_getattr(lib_uri,"Name",LibName);
+       put (_all_)(=);
        call symputx('LIB',libname,'L');
     end;
     else if nobj>1 then do;
-      &mD.putlog "ERROR: More than one library with libref=&libref";
-      &mAbort.call execute('%mf_abort(msg=
-        ERROR: More than one library with libref='!!"&libref
-        ,mac=mm_assignlib.sas)");
+      call symputx('mf_abort',1);
+      call symputx('msg',"More than one library with libref=&libref");
     end;
     else do;
-      &mD.putlog "ERROR: Library &libref not found in metadata";
-      &mAbort.call execute('%mf_abort(msg=ERROR: Library '!!"&libref"
-        !!' not found in metadata,mac=mm_assignlib.sas)');
+      call symputx('mf_abort',1);
+      call symputx('msg',"Library &libref not found in metadata");
     end;
   run;
-
+  %mf_abort(iftrue= (&mf_abort=1)
+    ,mac=mm_assignlib.sas
+    ,msg=&msg
+  )
   libname &libref meta library="&lib";
   %if %sysfunc(libref(&libref)) %then %do;
-    %&mD.put ERROR: mm_assignlib macro could not assign &libref;
-    %&mAbort.mf_abort(
-      msg=ERROR: mm_assignlib macro could not assign &libref
+    %mf_abort(msg=mm_assignlib macro could not assign &libref
       ,mac=mm_assignlib.sas);
   %end;
 %end;

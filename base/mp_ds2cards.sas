@@ -20,6 +20,7 @@
                   if omitted, will be same as BASE_DS.
   @param cards_file= Location in which to write the (.sas) cards file
   @param maxobs= to limit output to the first <code>maxobs</code> observations
+  @param showlog= whether to show generated cards file in the SAS log (YES/NO)
 
 
   @version 9.2
@@ -31,6 +32,7 @@
     ,cards_file="%sysfunc(pathname(work))/cardgen.sas"
     ,maxobs=max
     ,random_sample=NO
+    ,showlog=YES
 )/*/STORE SOURCE*/;
   %local i setds nvars;
 
@@ -38,15 +40,21 @@
    %put WARNING:  &base_ds does not exist;
    %return;
 %end;
-%let nvars=%mf_getvarcount(&base_ds);
-%if &nvars=0 %then %do;
-  %put WARNING:  Dataset &base_ds has no variables!  It will not be converted.;
-  %return;
-%end;
 
 %if %index(&base_ds,.)=0 %then %let base_ds=WORK.&base_ds;
 %if (&tgt_ds = ) %then %let tgt_ds=&base_ds;
 %if %index(&tgt_ds,.)=0 %then %let tgt_ds=WORK.%scan(&base_ds,2,.);
+
+/* get varcount */
+%let nvars=0;
+proc sql noprint;
+select count(*) into: nvars from dictionary.columns
+  where libname="%scan(%upcase(&base_ds),1)"
+    and memname="%scan(%upcase(&base_ds),2)";
+%if &nvars=0 %then %do;
+  %put WARNING:  Dataset &base_ds has no variables!  It will not be converted.;
+  %return;
+%end;
 
 
 data;run;
@@ -188,6 +196,14 @@ run;
 proc sql;
   drop table &setds;
 quit;
+
+%if &showlog=YES %then %do;
+  data _null_;
+    infile &cards_file lrecl=32767;
+    input;
+    put _infile_;
+  run;
+%end;
 
 %put NOTE: CARDS FILE SAVED IN:;
 %put NOTE-;%put NOTE-;

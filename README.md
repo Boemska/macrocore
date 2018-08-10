@@ -21,11 +21,11 @@ are welcomed.
  * No X command
  * Prefixes: _mm_
 
-**Windows** and **Unix** libraries:
+**xcmd** library:
  * OS specific
  * Metadata aware
  * X command enabled
- * Prefixes: _mw_,_mu_
+ * Prefixes: _mw_,_mu_,_mx_
 
 # Installation
 First, download the repo to a location your SAS system can access. Then update your sasautos path to include the components you wish to have available,eg:
@@ -50,6 +50,7 @@ The above can be done directly in your sas program, via an autoexec, or an initi
    - _mm_ for metadata macros (interface with the metadata server).
    - _mw_ for macros that only work in Windows (should work in ALL versions of windows)
    - _mu_ for macros that only work in Unix type environments (should work in ALL types of unix environment)
+   - _mx_ for macros that use X command and will work in both windows and unix environments.
  - follow verb-noun convention
  - unix style line endings (lf)
  - individual lines should be no more than 80 characters long
@@ -83,4 +84,4 @@ All macros must be commented in the doxygen format, to enable the [online docume
 
 # General Notes
 
-* All macros should be compatible with SAS versions from support level B and above (so currently 9.2 and later).  If an earlier version is not supported, then the macro should say as such in the header documentation, and exit gracefully (eg `%if &sysver<9.3 %then %return`).
+* All macros should be compatible with SAS versions from support level B and above (so currently 9.2 and later).  If an earlier version is not supported, then the macro should say as such in the header documentation, and exit gracefully (eg `%if %sysevalf(&sysver<9.3) %then %return`).

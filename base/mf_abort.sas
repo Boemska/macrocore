@@ -24,7 +24,9 @@
   %put NOTE: ///  mf_abort macro executing //;
   %if %length(&mac)>0 %then %put NOTE- called by &mac;
   %put NOTE - &msg;
-
+  %if not %symexist(h54sDebuggingMode) %then %do;
+    %let h54sDebuggingMode=0;
+  %end;
   /* Stored Process Server web app context */
   %if %symexist(_metaperson) %then %do;
     /* send response in Boemska h54s JSON format */
@@ -35,6 +37,8 @@
       if symexist('logmessage') then logmessage=quote(trim(symget('logmessage')));
       else logmessage='"blank"';
       sasdatetime=datetime();
+      if symexist('_debug') then debug=symget('_debug');
+      if debug=131 then put "--h54s-data-start--";
       put '{"abort" : [{"MSG": "' "&msg" '","MAC": "' "&mac" '"}],';
       put '"usermessage" : ' usermessage ',';
       put '"logmessage" : ' logmessage ',';
@@ -44,12 +48,13 @@
       put '"executingPid" : ' "&sysjobid." ',';
       put '"sasDatetime" : ' sasdatetime ',';
       put '"status" : "success"}';
+      if debug=131 then put "--h54s-data-end--";
     run;
     filename _webout clear;
     /* no other way to abort an STP session */
     /* see https://blogs.sas.com/content/sgf/2017/07/28/controlling-stored-process-execution-through-request-initialization-code-injection/*/
     data _null_;
-      abort cancel;
+      rc = stpsrvset('program error', 0);
     run;
     endsas;
   %end;
