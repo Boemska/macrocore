@@ -6,12 +6,12 @@
 
   Usage:
 
-      mm_updatestpsourcecode(stp=/my/metadata/path/mystpname
+    %mm_updatestpsourcecode(stp=/my/metadata/path/mystpname
       ,stpcode=/file/system/source.sas)
 
 
   @param stp= the BIP Tree folder path plus Stored Process Name
-  @param outds= the source file (or fileref) containing the SAS code to load
+  @param stpcode= the source file (or fileref) containing the SAS code to load
     into the stp.  For multiple files, they should simply be concatenated first.
   @param frefin= change default inref if it clashes with an existing one
   @param frefout= change default outref if it clashes with an existing one
