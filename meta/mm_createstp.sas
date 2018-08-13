@@ -366,28 +366,6 @@ run;
     ,frefout=&frefout.
     ,mdebug=&mdebug)
 
-/*
-<GetMetadata>
-  <Reposid>A0000001.A5RIITO4</Reposid>
-  <Metadata>
-    <ClassifierMap id="A5RIITO4.BC0000NW" Desc="undefined" IsActive="1" IsHidden="0" IsUserDefined="0" Name="buildUserNavigator" PublicType="StoredProcess" TransformRole="StoredProcess" UsageVersion="2000000">
-      <ComputeLocations>
-        <ServerContext Id="A5RIITO4.AT000002" Name="SASApp"/>
-      </ComputeLocations>
-      <Notes>
-        <TextStore Id="A5RIITO4.AG0001YW" Name="SourceCode"/>
-        <TextStore Id="A5RIITO4.AG0001YX" Name="Stored Process"/>
-      </Notes>
-      <Prompts>
-        <PromptGroup Id="A5RIITO4.B80000I6" Name="Parameters"/>
-      </Prompts>
-     <Trees><Tree id="blah" name="blah"></Trees>
-    </ClassifierMap>
-  </Metadata>
-  <NS>SAS</NS>
-  <Flags>2049</Flags>
-</GetMetadata>
-*/
 
 %end;
 %else %do;
