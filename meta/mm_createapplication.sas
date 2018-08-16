@@ -36,10 +36,10 @@
 
 %macro mm_createapplication(
     tree=/User Folders/sasdemo
-    ,name=myNote
+    ,name=myApp
     ,ClassIdentifier=mcore
     ,desc=Created by mm_createapplication
-    ,params= param1=1 param2=blah
+    ,params= param1=1&#x0a;param2=blah
     ,version=
     ,frefin=mm_in
     ,frefout=mm_out
@@ -67,7 +67,7 @@ run;
 
 %mf_abort(
   iftrue= (&type ne Tree)
-  ,mac=mm_createdocument.sas
+  ,mac=mm_createapplication.sas
   ,msg=Tree &tree does not exist!
 )
 
@@ -76,21 +76,20 @@ run;
  */
 data _null_;
   length type uri $256;
-  rc=metadata_pathobj("","&tree/&name","Note",type,uri);
+  rc=metadata_pathobj("","&tree/&name","Application",type,uri);
   call symputx('type',type,'l');
-  call symputx('docuri',uri,'l');
   putlog (_all_)(=);
 run;
 
 %mf_abort(
-  iftrue= (&type = Document)
-  ,mac=mm_createdocument.sas
-  ,msg=Document &name already exists in &tree!
+  iftrue= (&type = SoftwareComponent)
+  ,mac=mm_createapplication.sas
+  ,msg=Application &name already exists in &tree!
 )
 
 
 /**
- * Now we can create the document
+ * Now we can create the application
  */
 filename &frefin temp;
 
@@ -131,5 +130,19 @@ run;
     put _infile_;
   run;
 %end;
+
+%put NOTE: Checking to ensure application (&name) was created;
+data _null_;
+  length type uri $256;
+  rc=metadata_pathobj("","&tree/&name","Application",type,uri);
+  call symputx('apptype',type,'l');
+  %if &mdebug=1 %then putlog (_all_)(=);;
+run;
+%if &apptype ne SoftwareComponent %then %do;
+  %put %str(ERR)OR: Could not find (&name) at (&tree)!!;
+  %return;
+%end;
+%else %put NOTE: Application (&name) successfully created in (&tree)!;
+
 
 %mend;
