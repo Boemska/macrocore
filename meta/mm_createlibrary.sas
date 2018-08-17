@@ -293,7 +293,7 @@ filename &frefout temp;
     %put %str(ERR)OR: Could not find (&libname) at (&tree)!!;
     %return;
   %end;
-  %else %put NOTE: Library (&lib) successfully created in (&tree)!;
+  %else %put NOTE: Library (&libname) successfully created in (&tree)!;
 %end;
 %else %do;
   %put %str(ERR)OR: Other library engine types are not yet supported!!;
