@@ -31,7 +31,6 @@
 
 %macro mm_assigndirectlib(
      libref /* libref to assign from metadata */
-    ,debug=  /* set to YES for extra log info */
     ,open_passthrough= /* provide an alias to produce the
                           CONNECT TO statement for the
                           relevant external database */
@@ -237,6 +236,97 @@ run;
     libname &libref ODBC DATASRC=&sql_dsn SCHEMA=&sql_schema;
   %end;
 %end;
+%else %if &engine=POSTGRES %then %do;
+  %put NOTE: Obtaining POSTGRES library details;
+  data _null_;
+    length database ignore_read_only_columns direct_exe preserve_col_names
+      preserve_tab_names server schema authdomain user password
+      prop name value uri urisrc $256.;
+    call missing (of _all_);
+    /* get database value */
+    prop='Connection.DBMS.Property.DB.Name.xmlKey.txt';
+    rc=metadata_getprop("&liburi",prop,database,"");
+    if database^='' then database='database='!!quote(trim(database));
+    call symputx('database',database,'l');
+
+    /* get IGNORE_READ_ONLY_COLUMNS value */
+    prop='Library.DBMS.Property.DBIROC.Name.xmlKey.txt';
+    rc=metadata_getprop("&liburi",prop,ignore_read_only_columns,"");
+    if ignore_read_only_columns^='' then ignore_read_only_columns=
+      'ignore_read_only_columns='!!ignore_read_only_columns;
+    call symputx('ignore_read_only_columns',ignore_read_only_columns,'l');
+
+    /* get DIRECT_EXE value */
+    prop='Library.DBMS.Property.DirectExe.Name.xmlKey.txt';
+    rc=metadata_getprop("&liburi",prop,direct_exe,"");
+    if direct_exe^='' then direct_exe='direct_exe='!!direct_exe;
+    call symputx('direct_exe',direct_exe,'l');
+
+    /* get PRESERVE_COL_NAMES value */
+    prop='Library.DBMS.Property.PreserveColNames.Name.xmlKey.txt';
+    rc=metadata_getprop("&liburi",prop,preserve_col_names,"");
+    if preserve_col_names^='' then preserve_col_names=
+      'preserve_col_names='!!preserve_col_names;
+    call symputx('preserve_col_names',preserve_col_names,'l');
+
+    /* get PRESERVE_TAB_NAMES value */
+    prop='Library.DBMS.Property.PreserveTabNames.Name.xmlKey.txt';
+    rc=metadata_getprop("&liburi",prop,preserve_tab_names,"");
+    if preserve_tab_names^='' then preserve_tab_names=
+      'preserve_tab_names='!!preserve_tab_names;
+    call symputx('preserve_tab_names',preserve_tab_names,'l');
+
+    /* get SERVER value */
+    if metadata_getnasn("&liburi","LibraryConnection",1,uri)>0 then do;
+      prop='Connection.DBMS.Property.SERVER.Name.xmlKey.txt';
+      rc=metadata_getprop(uri,prop,server,"");
+    end;
+    if server^='' then server='server='!!server;
+    call symputx('server',server,'l');
+
+    /* get SCHEMA value */
+    if metadata_getnasn("&liburi","UsingPackages",1,uri)>0 then do;
+      rc=metadata_getattr(uri,"SchemaName",schema);
+    end;
+    if schema^='' then schema='schema='!!schema;
+    call symputx('schema',schema,'l');
+
+    /* get AUTHDOMAIN value */
+    /* this is only useful if the user account contains that auth domain
+    if metadata_getnasn("&liburi","DefaultLogin",1,uri)>0 then do;
+      rc=metadata_getnasn(uri,"Domain",1,urisrc);
+      rc=metadata_getattr(urisrc,"Name",authdomain);
+    end;
+    if authdomain^='' then authdomain='authdomain='!!quote(trim(authdomain));
+    */
+    call symputx('authdomain',authdomain,'l');
+
+    /* get user & pass */
+    if authdomain='' & metadata_getnasn("&liburi","DefaultLogin",1,uri)>0 then
+    do;
+      rc=metadata_getattr(uri,"UserID",user);
+      rc=metadata_getattr(uri,"Password",password);
+    end;
+    if user^='' then do;
+      user='user='!!quote(trim(user));
+      password='password='!!quote(trim(password));
+    end;
+    call symputx('user',user,'l');
+    call symputx('password',password,'l');
+
+    &md.put _all_;
+  run;
+
+  %if %length(&open_passthrough)>0 %then %do;
+    %put WARNING:  Passthrough option for postgres not yet supported;
+    %return;
+  %end;
+  %else %do;
+    libname &libref POSTGRES &database &ignore_read_only_columns &direct_exe
+      &preserve_col_names &preserve_tab_names &server &schema &authdomain
+      &user &password;
+  %end;
+%end;
 %else %if &engine= %then %do;
   %put NOTE: Libref &libref is not registered in metadata;
   %&mAbort.mf_abort(
@@ -245,8 +335,8 @@ run;
   %return;
 %end;
 %else %do;
-  %put NOTE: Engine &engine is currently unsupported;
-  %put NOTE- Please contact your support team.;
+  %put WARNING: Engine &engine is currently unsupported;
+  %put WARNING- Please contact your support team.;
   %return;
 %end;
 
