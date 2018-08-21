@@ -270,6 +270,8 @@ run;
     call symputx('preserve_col_names',preserve_col_names,'l');
 
     /* get PRESERVE_TAB_NAMES value */
+    /* be careful with PRESERVE_TAB_NAMES=YES - it will mean your table will
+       become case sensitive!! */
     prop='Library.DBMS.Property.PreserveTabNames.Name.xmlKey.txt';
     rc=metadata_getprop("&liburi",prop,preserve_tab_names,"");
     if preserve_tab_names^='' then preserve_tab_names=
@@ -322,6 +324,12 @@ run;
     %return;
   %end;
   %else %do;
+    %if &mdebug=1 %then %do;
+      %put NOTE: Executing the following:/;
+      %put NOTE- libname &libref POSTGRES &database &ignore_read_only_columns;
+      %put NOTE-   &direct_exe &preserve_col_names &preserve_tab_names;
+      %put NOTE-   &server &schema &authdomain &user &password //;
+    %end;
     libname &libref POSTGRES &database &ignore_read_only_columns &direct_exe
       &preserve_col_names &preserve_tab_names &server &schema &authdomain
       &user &password;
