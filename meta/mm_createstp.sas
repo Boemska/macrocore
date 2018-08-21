@@ -114,6 +114,7 @@ run;
 /**
  * Check STP does not exist already
  */
+%local cmtype;
 data _null_;
   length type uri $256;
   rc=metadata_pathobj("","&tree/&stpname",'StoredProcess',type,uri);
