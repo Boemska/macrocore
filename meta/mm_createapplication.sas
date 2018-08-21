@@ -13,6 +13,10 @@
         ,params= name1=value1&#x0a;name2=value2&#x0a;emptyvalue=
       )
 
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
+  @li mf_verifymacvars.sas
+
   @param tree= The metadata folder uri, or the metadata path, in which to
     create the object.  This must exist.
   @param name= Application object name.  Avoid spaces.

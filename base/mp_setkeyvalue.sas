@@ -6,6 +6,8 @@
     %mp_setkeyvalue(someindex,22,type=N)
     %mp_setkeyvalue(somenewindex,somevalue)
 
+  <h4> Dependencies </h4>
+  @li mf_existds.sas
 
   @param key Provide a key on which to perform the lookup
   @param value Provide a value

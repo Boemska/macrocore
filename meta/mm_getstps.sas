@@ -14,6 +14,9 @@
 
       %mm_getstps(tree=/My Folder/My STPs, name=My STP)
 
+  <h4> Dependencies </h4>
+  @li mm_gettree.sas
+
   @param tree= the metadata folder location in which to search.  Leave blank
     for all folders.  Does not search subdirectories.
   @param name= Provide the name of an STP to search for just that one.  Can

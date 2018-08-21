@@ -12,6 +12,11 @@
       %mm_createdocument(tree=/User Folders/sasdemo
         ,name=MyNote)
 
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
+  @li mf_verifymacvars.sas
+
+
   @param tree= The metadata folder uri, or the metadata path, in which to
     create the document.  This must exist.
   @param name= Document object name.  Avoid spaces.

@@ -1,12 +1,15 @@
 /**
   @file
-  @brief Assigns a library using meta engine via LIBREF
+  @brief Assigns a meta engine library using LIBREF
   @details Queries metadata to get the library NAME which can then be used in
     a libname statement with the meta engine.
 
   usage:
 
       %mm_assign_lib(SOMEREF);
+
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
 
   @param libref the libref (not name) of the metadata library
   @param mDebug= set to 1 to show debug messages in the log

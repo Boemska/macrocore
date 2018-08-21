@@ -13,6 +13,12 @@
 
   Only searches character columns!
 
+  <h4> Dependencies </h4>
+  @li mf_getvarlist.sas
+  @li mf_getvartype.sas
+  @li mf_mkdir.sas
+  @li mf_nobs.sas
+
   @version 9.2
   @author Allan Bowe
 **/

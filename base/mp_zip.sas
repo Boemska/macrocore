@@ -12,6 +12,9 @@
   be sure that _debug is not set (else the SPWA will send non zipped content
   as well).
 
+  <h4> Dependencies </h4>
+  @li mp_dirlist.sas
+
   @param in= unquoted filepath, dataset of files or directory to zip
   @param type= FILE, DATASET, DIRECTORY. (FILE / DATASET not ready yet)
   @param outname= output file to create, without .zip extension

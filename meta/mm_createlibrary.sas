@@ -19,6 +19,9 @@
       ,directory=/tmp/tests
       ,mDebug=1)
 
+  <h4> Dependencies </h4>
+  @li mf_verifymacvars.sas
+
 
   @param libname= Library name (as displayed to user, 256 chars). Duplicates
     are not created (case sensitive).

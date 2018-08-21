@@ -14,6 +14,10 @@
       disconnect from MyAlias;
       quit;
 
+  <h4> Dependencies </h4>
+  @li mf_getengine.sas
+  @li mf_abort.sas
+
   @param libref the libref (not name) of the metadata library
   @param open_passthrough= provide an alias to produce the CONNECT TO statement
     for the relevant external database
@@ -52,7 +56,7 @@
 %&mD.put NOTE: Creating direct (non META) connection to &libref library;
 
 %local cur_engine;
-%let cur_engine=%mf_getEngine(&libref);
+%let cur_engine=%mf_getengine(&libref);
 %if &cur_engine ne META and &cur_engine ne %then %do;
   %put NOTE:  &libref already has a direct (&cur_engine) libname connection;
   %return;

@@ -39,6 +39,13 @@
         ,Server=SASApp
         ,stptype=2)
 
+  <h4> Dependencies </h4>
+  @li mf_nobs.sas
+  @li mf_verifymacvars.sas
+  @li mm_getdirectories.sas
+  @li mm_updatestpsourcecode.sas
+  @li mp_dropmembers.sas
+
   @param stpname= Stored Process name.  Avoid spaces - testing has shown that
     the check to avoid creating multiple STPs in the same folder with the same
     name does not work when the name contains spaces.
@@ -149,7 +156,7 @@ run;
   run;
 
   %if &checkdirtype ne Directory %then %do;
-    %mm_getDirectories(path=&directory,outds=&outds ,mDebug=&mDebug)
+    %mm_getdirectories(path=&directory,outds=&outds ,mDebug=&mDebug)
     %if %mf_nobs(&outds)=0 or %sysfunc(exist(&outds))=0 %then %do;
       %put WARNING: The directory object does not exist for &directory;
       %return;

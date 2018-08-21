@@ -11,6 +11,9 @@
   Returns:
   > 1
 
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
+
   @param verifyvars space separated list of macro variable names
   @param makeupcase= set to YES to convert all variable VALUES to
     uppercase.
