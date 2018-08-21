@@ -5,10 +5,14 @@
 
       %if %mf_existds(libds=work.someview) %then %put  yes it does!;
 
+  NOTE - some databases have case sensitive tables, for instance POSTGRES
+    with the preserve_tab_names=yes libname setting.  This may impact
+    expected results (depending on whether you 'expect' the result to be
+    case insensitive in this context!)
+
   @param libds library.dataset
   @return output returns 1 or 0
-  @warning Not yet tested on database tables or tables registered in metadata but not
-      physically present
+  @warning Untested on tables registered in metadata but not physically present
   @version 9.2
   @author Allan Bowe
   @copyright GNU GENERAL PUBLIC LICENSE v3
