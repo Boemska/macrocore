@@ -4,23 +4,24 @@
   @details Where data stores hierarchies in a simple parent / child mapping,
     it is not always straightforward to extract all the children for a
     particular parent.  This problem is known as a recursive self join.  This
-    macro will extract all the descendents for a parent, eg:
+    macro will extract all the descendents for a parent.
+  Usage:
 
-    data have;
-      p=1;c=2;output;
-      p=2;c=3;output;
-      p=2;c=4;output;
-      p=3;c=5;output;
-      p=6;c=7;output;
-      p=8;c=9;output;
-    run;
+      data have;
+        p=1;c=2;output;
+        p=2;c=3;output;
+        p=2;c=4;output;
+        p=3;c=5;output;
+        p=6;c=7;output;
+        p=8;c=9;output;
+      run;
 
-    %mp_recursivejoin(base_ds=have
-      ,outds=want
-      ,matchval=1
-      ,parentvar=p
-      ,childvar=c
-      )
+      %mp_recursivejoin(base_ds=have
+        ,outds=want
+        ,matchval=1
+        ,parentvar=p
+        ,childvar=c
+        )
 
   @param base_ds= base table containing hierarchy (not modified)
   @param outds= the output dataset to create with the generated hierarchy

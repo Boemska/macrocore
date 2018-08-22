@@ -3,9 +3,9 @@
   @brief Create a CARDS file from a SAS dataset.
   @details Uses dataset attributes to convert all data into datalines.
     Running the generated file will rebuild the original dataset.
-    usage:
+  usage:
 
-    %mp_ds2cards(base_ds=sashelp.class
+      %mp_ds2cards(base_ds=sashelp.class
         , cards_file= "C:\temp\class.sas"
         , maxobs=5)
 
