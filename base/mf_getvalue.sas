@@ -7,6 +7,8 @@
       %put %mf_getvalue(sashelp.class,name,filter=%quote(age=15));
       %put %mf_getvalue(sashelp.class,name);
 
+  <h4> Dependencies </h4>
+  @li mf_nobs.sas
 
   @param libds dataset to query
   @param variable the variable which contains the value to return.
