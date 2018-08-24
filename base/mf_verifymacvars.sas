@@ -59,7 +59,7 @@
   %goto exit_success;
   %exit_error:
     %if &mAbort=SOFT %then %put ERROR: &abortmsg;
-    %else %mf_abort(mac=mf_verifymacvars,type=&mfabort,msg=&abortmsg);
+    %else %mf_abort(mac=mf_verifymacvars,type=&mabort,msg=&abortmsg);
   %exit_success:
 
 %mend;
