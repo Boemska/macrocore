@@ -8,7 +8,7 @@
       %put %mf_getvalue(sashelp.class,name);
 
   <h4> Dependencies </h4>
-  @li mf_nobs.sas
+  @li mf_getattrn.sas
 
   @param libds dataset to query
   @param variable the variable which contains the value to return.
@@ -21,7 +21,7 @@
 
 %macro mf_getvalue(libds,variable,filter=1
 )/*/STORE SOURCE*/;
- %if %mf_nobs(&libds)>0 %then %do;
+ %if %mf_getattrn(&libds,NLOBS)>0 %then %do;
     %local dsid rc &variable;
     %let dsid=%sysfunc(open(&libds(where=(&filter))));
     %syscall set(dsid);
