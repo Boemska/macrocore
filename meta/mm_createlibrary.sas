@@ -250,6 +250,7 @@ filename &frefout temp;
     libdesc=tranwrd(libdesc,'"','&quot;');
     libdesc=tranwrd(libdesc,'0A'x,'&#10;');
     libdesc=tranwrd(libdesc,'0D'x,'&#13;');
+    libdesc=tranwrd(libdesc,'$','&#36;');
     libdesc=quote(trim(libdesc));
 
     put "<AddMetadata><Reposid>$METAREPOSITORY</Reposid><Metadata> "/
