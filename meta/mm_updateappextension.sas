@@ -86,6 +86,7 @@ data _null_;
   outstr=tranwrd(outstr,'"','&quot;');
   outstr=tranwrd(outstr,'0A'x,'&#10;');
   outstr=tranwrd(outstr,'0D'x,'&#13;');
+  outstr=tranwrd(outstr,'$','&#36;');
   call symputx('paramdesc',outstr,'l');
 run;
 
