@@ -32,14 +32,16 @@
     /* send response in Boemska h54s JSON format */
     data _null_;
       file _webout mod;
+      length msg $32767;
       if symexist('usermessage') then usermessage=quote(trim(symget('usermessage')));
       else usermessage='"blank"';
       if symexist('logmessage') then logmessage=quote(trim(symget('logmessage')));
       else logmessage='"blank"';
       sasdatetime=datetime();
+      msg=quote(trim(symget(msg)));
       if symexist('_debug') then debug=symget('_debug');
       if debug=131 then put "--h54s-data-start--";
-      put '{"abort" : [{"MSG": "' "&msg" '","MAC": "' "&mac" '"}],';
+      put '{"abort" : [{"MSG": "' msg '","MAC": "' "&mac" '"}],';
       put '"usermessage" : ' usermessage ',';
       put '"logmessage" : ' logmessage ',';
       put '"errormessage" : "aborted by mf_abort macro",';
