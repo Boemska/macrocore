@@ -29,19 +29,49 @@
   %end;
   /* Stored Process Server web app context */
   %if %symexist(_metaperson) %then %do;
+    options obs=max replace nosyntaxcheck mprint;
+    /* extract log error / warning, if exist */
+    %local logloc logmsg;
+    %let logloc=&SYSPRINTTOLOG;
+    proc printto log=log;run;
+    %if %length(&logloc)>0 %then %do;
+      data _null_;
+        infile &logloc;
+        input; putlog _infile_;
+        i=1;
+        retain logonce 0;
+        if _infile_=:'WARNING' or _infile_=:'ERROR' and logonce=0
+        then do until (i=10);
+          call symputx('logmsg',catx('\n',symget('logmsg'),_infile_));
+          input;
+          putlog _infile_;
+          i+1;
+          logonce+1;
+        end;
+      run;
+    %end;
+
     /* send response in Boemska h54s JSON format */
     data _null_;
-      file _webout mod;
+      file _webout mod lrecl=32000;
       length msg $32767;
       if symexist('usermessage') then usermessage=quote(trim(symget('usermessage')));
       else usermessage='"blank"';
       if symexist('logmessage') then logmessage=quote(trim(symget('logmessage')));
       else logmessage='"blank"';
       sasdatetime=datetime();
-      msg=quote(trim(symget(msg)));
+      msg=cats(symget('msg'),'\n\n<b>Log Extract:</b>\n',symget('logmsg'));
+      /* escape the quotes */
+      msg=tranwrd(msg,'"','\"');
+      /* ditch the CRLFs as chrome complains */
+      msg=compress(msg,,'kw');
+      /* quote without quoting the quotes (which are escaped instead) */
+      msg=cats('"',msg,'"');
       if symexist('_debug') then debug=symget('_debug');
       if debug=131 then put "--h54s-data-start--";
-      put '{"abort" : [{"MSG": "' msg '","MAC": "' "&mac" '"}],';
+      put '{"abort" : [{';
+      put ' "MSG":' msg ;
+      put ' ,"MAC": "' "&mac" '"}],';
       put '"usermessage" : ' usermessage ',';
       put '"logmessage" : ' logmessage ',';
       put '"errormessage" : "aborted by mf_abort macro",';
@@ -51,13 +81,10 @@
       put '"sasDatetime" : ' sasdatetime ',';
       put '"status" : "success"}';
       if debug=131 then put "--h54s-data-end--";
-    run;
-    filename _webout clear;
-    /* no other way to abort an STP session */
-    /* see https://blogs.sas.com/content/sgf/2017/07/28/controlling-stored-process-execution-through-request-initialization-code-injection/*/
-    data _null_;
       rc = stpsrvset('program error', 0);
     run;
+    %let syscc=0;
+    filename _webout clear;
     endsas;
   %end;
 
