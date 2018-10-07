@@ -99,15 +99,20 @@ run;
         rc3=metadata_getnasn("&liburi",'UsingPackages',i,up_uri);
     end;
     cat_path = trim(cat_path) !! ");";
-    %&mD.put NOTE: Getting physical path for &libref library;
-    &mD.put rc3= up_uri= rc4= cat_path= path=;
-    %&mD.put NOTE: Libname cmd will be:;
-    %&mD.put libname &libref &filepath;
+    &mD.putlog "NOTE: Getting physical path for &libref library";
+    &mD.putlog rc3= up_uri= rc4= cat_path= path=;
+    &mD.putlog "NOTE: Libname cmd will be:";
+    &mD.putlog "libname &libref" cat_path;
     call symputx("filepath",cat_path,'l');
   run;
 
-
-  libname &libref &filepath;
+  %if %sysevalf(&sysver<9.4) %then %do;
+   libname &libref &filepath;
+  %end;
+  %else %do;
+    /* apply the new filelocks option to cater for temporary locks */
+    libname &libref &filepath filelockwait=5;
+  %end;
 
 %end;
 %else %if &engine=REMOTE %then %do;
