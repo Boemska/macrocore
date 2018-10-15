@@ -67,6 +67,7 @@
 %end;
 
 /* need to determine the library ENGINE first */
+%local engine;
 data _null_;
   length lib_uri engine $256;
   call missing (of _all_);
@@ -74,7 +75,7 @@ data _null_;
   rc1=metadata_getnobj("omsobj:SASLibrary?@Libref ='&libref'",1,lib_uri);
   /* get the Engine attribute of the previous object */
   rc2=metadata_getattr(lib_uri,'Engine',engine);
-  &mD.put rc1= lib_uri= rc2= engine=;
+  putlog "mm_assigndirectlib for &libref:" rc1= lib_uri= rc2= engine=;
   call symputx("liburi",lib_uri,'l');
   call symputx("engine",engine,'l');
 run;
@@ -98,7 +99,7 @@ run;
       i+1;
         rc3=metadata_getnasn("&liburi",'UsingPackages',i,up_uri);
     end;
-    cat_path = trim(cat_path) !! ");";
+    cat_path = trim(cat_path) !! ")";
     &mD.putlog "NOTE: Getting physical path for &libref library";
     &mD.putlog rc3= up_uri= rc4= cat_path= path=;
     &mD.putlog "NOTE: Libname cmd will be:";

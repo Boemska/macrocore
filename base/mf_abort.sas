@@ -31,24 +31,38 @@
   %if %symexist(_metaperson) %then %do;
     options obs=max replace nosyntaxcheck mprint;
     /* extract log error / warning, if exist */
-    %local logloc logmsg;
+    %local logloc logline;
+    %global logmsg; /* capture global messages */
     %let logloc=&SYSPRINTTOLOG;
     proc printto log=log;run;
     %if %length(&logloc)>0 %then %do;
+      %let logline=0;
       data _null_;
-        infile &logloc;
+        infile &logloc lrecl=5000;
         input; putlog _infile_;
         i=1;
         retain logonce 0;
-        if _infile_=:'WARNING' or _infile_=:'ERROR' and logonce=0
-        then do until (i=10);
-          call symputx('logmsg',catx('\n',symget('logmsg'),_infile_));
-          input;
-          putlog _infile_;
-          i+1;
+        if (_infile_=:'WARNING' or _infile_=:'ERROR') and logonce=0 then do;
+          call symputx('logline',_n_);
           logonce+1;
         end;
       run;
+      /* capture log including lines BEFORE the error */
+      %if &logline>0 %then %do;
+        data _null_;
+          infile &logloc lrecl=5000;
+          input;
+          i=1;
+          stoploop=0;
+          if _n_ ge &logline-5 and stoploop=0 then do until (i>12);
+            call symputx('logmsg',catx('\n',symget('logmsg'),_infile_));
+            input;
+            i+1;
+            stoploop=1;
+          end;
+          if stoploop=1 then stop;
+        run;
+      %end;
     %end;
 
     /* send response in Boemska h54s JSON format */
@@ -60,7 +74,7 @@
       if symexist('logmessage') then logmessage=quote(trim(symget('logmessage')));
       else logmessage='"blank"';
       sasdatetime=datetime();
-      msg=cats(symget('msg'),'\n\n<b>Log Extract:</b>\n',symget('logmsg'));
+      msg=cats(symget('msg'),'\n\nLog Extract:\n',symget('logmsg'));
       /* escape the quotes */
       msg=tranwrd(msg,'"','\"');
       /* ditch the CRLFs as chrome complains */
