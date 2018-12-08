@@ -62,6 +62,7 @@
   @param mDebug= set to 1 to show debug messages in the log
   @param stptype= Default is 1 (STP code saved on filesystem).  Set to 2 if
     source code is to be saved in metadata (9.3 and above feature).
+  @param minify= set to YES to strip comments / blank lines etc
   @param frefin= fileref to use (enables change if there is a conflict).  The
     filerefs are left open, to enable inspection after running the
     macro (or importing into an xmlmap if needed).
@@ -91,6 +92,7 @@
     ,mDebug=0
     ,server=SASApp - Logical Stored Process Server
     ,stptype=1
+    ,minify=NO
     ,frefin=mm_in
     ,frefout=mm_out
 )/*/STORE SOURCE*/;
@@ -372,7 +374,8 @@ run;
     ,stpcode="&directory/&filename"
     ,frefin=&frefin.
     ,frefout=&frefout.
-    ,mdebug=&mdebug)
+    ,mdebug=&mdebug
+    ,minify=&minify)
 
 
 %end;
