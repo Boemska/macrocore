@@ -7,12 +7,14 @@
   Usage:
 
     %mm_updatestpsourcecode(stp=/my/metadata/path/mystpname
-      ,stpcode=/file/system/source.sas)
+      ,stpcode="/file/system/source.sas")
 
 
   @param stp= the BIP Tree folder path plus Stored Process Name
   @param stpcode= the source file (or fileref) containing the SAS code to load
     into the stp.  For multiple files, they should simply be concatenated first.
+  @param minify= set to YES in order to strip comments, blank lines, and CRLFs.
+
   @param frefin= change default inref if it clashes with an existing one
   @param frefout= change default outref if it clashes with an existing one
   @param mDebug= set to 1 to show debug messages in the log
@@ -23,9 +25,13 @@
 
 **/
 
-%macro mm_updatestpsourcecode(stp=,stpcode=
-  ,frefin=inmeta,frefout=outmeta
-  , mdebug=0);
+%macro mm_updatestpsourcecode(stp=
+  ,stpcode=
+  ,minify=NO
+  ,frefin=inmeta
+  ,frefout=outmeta
+  ,mdebug=0
+);
 /* first, check if STP exists */
 %local tsuri;
 %let tsuri=stopifempty ;
@@ -71,17 +77,24 @@ run;
 %if %length(&stpcode)>2 %then %do;
   data _null_;
     file &frefin mod;
-    infile &stpcode;
-    input;
+    infile &stpcode lrecl=32767;
     length outstr $32767;
+    input outstr ;
     /* escape code so it can be stored as XML */
     outstr=tranwrd(_infile_,'&','&amp;');
     outstr=tranwrd(outstr,'<','&lt;');
     outstr=tranwrd(outstr,'>','&gt;');
     outstr=tranwrd(outstr,"'",'&apos;');
     outstr=tranwrd(outstr,'"','&quot;');
-    outstr=tranwrd(outstr,'0A'x,'&#10;');
-    outstr=tranwrd(outstr,'0D'x,'&#13;');
+    outstr=tranwrd(outstr,'0A'x,'&#x0a;');
+    outstr=tranwrd(outstr,'0D'x,'&#x0d;');
+    outstr=tranwrd(outstr,'$','&#36;');
+    %if &minify=YES %then %do;
+      outstr=cats(outstr);
+      if outstr ne '';
+      if not (outstr=:'/*' and subpad(left(reverse(outstr)),1,2)='/*');
+    %end;
+    outstr=trim(outstr);
     put outstr '&#10;';
   run;
 %end;
