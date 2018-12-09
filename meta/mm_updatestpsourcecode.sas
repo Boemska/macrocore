@@ -64,47 +64,54 @@ run;
   %return;
 %end;
 
-filename &frefin temp;
-
-/* write header XML */
-data _null_;
-  file &frefin;
-  put "<UpdateMetadata><Reposid>$METAREPOSITORY</Reposid>
-    <Metadata><TextStore id='&tsuri' StoredText='";
-run;
-
-/* write contents */
-%if %length(&stpcode)>2 %then %do;
-  data _null_;
-    file &frefin mod;
-    infile &stpcode lrecl=32767;
-    length outstr $32767;
-    input outstr ;
-    /* escape code so it can be stored as XML */
-    outstr=tranwrd(_infile_,'&','&amp;');
-    outstr=tranwrd(outstr,'<','&lt;');
-    outstr=tranwrd(outstr,'>','&gt;');
-    outstr=tranwrd(outstr,"'",'&apos;');
-    outstr=tranwrd(outstr,'"','&quot;');
-    outstr=tranwrd(outstr,'0A'x,'&#x0a;');
-    outstr=tranwrd(outstr,'0D'x,'&#x0d;');
-    outstr=tranwrd(outstr,'$','&#36;');
-    %if &minify=YES %then %do;
-      outstr=cats(outstr);
-      if outstr ne '';
-      if not (outstr=:'/*' and subpad(left(reverse(outstr)),1,2)='/*');
-    %end;
-    outstr=trim(outstr);
-    put outstr '&#10;';
-  run;
+%if %length(&stpcode)<2 %then %do;
+  %put WARNING:  No SAS code supplied!!;
+  %return;
 %end;
 
-/* write footer XML */
+filename &frefin temp lrecl=10000000;
+
+%if &minify=YES %then %do;
+  filename &frefin.2 temp;
+  data _null_;
+    file &frefin.2 lrecl=10000000;
+    infile &stpcode lrecl=10000000;
+    input;
+    if _infile_ ne '';
+    if not (_infile_=:'/*' and subpad(left(reverse(_infile_)),1,2)='/*');
+    put _infile_;
+  run;
+  %let stpcode=&frefin.2;
+%end;
+
+/* escape code so it can be stored as XML */
+/* input file may be over 32k wide, so deal with one char at a time */
+data _null_;
+  file &frefin recfm=n;
+  infile &stpcode recfm=n;
+  input instr $CHAR1. ;
+  if _n_=1 then put "<UpdateMetadata><Reposid>$METAREPOSITORY</Reposid>
+    <Metadata><TextStore id='&tsuri' StoredText='" @@;
+  select (instr);
+    when (';') put '&#x3b;';
+    when ('&') put '&amp;';
+    when ('<') put '&lt;';
+    when ('>') put '&gt;';
+    when ("'") put '&apos;';
+    when ('"') put '&quot;';
+    when ('0A'x) put '&#x0a;';
+    when ('0D'x) put '&#x0d;';
+    when ('$') put '&#36;';
+    otherwise put instr $CHAR1.;
+  end;
+run;
+
 data _null_;
   file &frefin mod;
-  put "' ></TextStore></Metadata><NS>SAS</NS><Flags>268435456</Flags>
-   </UpdateMetadata>";
+  put "'></TextStore></Metadata><NS>SAS</NS><Flags>268435456</Flags>
+    </UpdateMetadata>";
 run;
+
 
 filename &frefout temp;
 
