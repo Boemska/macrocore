@@ -69,42 +69,41 @@ run;
   %return;
 %end;
 
-filename &frefin temp lrecl=10000000;
+filename &frefin temp lrecl=32767;
 
-%if &minify=YES %then %do;
-  filename &frefin.2 temp;
-  data _null_;
-    file &frefin.2 lrecl=10000000;
-    infile &stpcode lrecl=10000000;
-    input;
-    if _infile_ ne '';
-    if not (_infile_=:'/*' and subpad(left(reverse(_infile_)),1,2)='/*');
-    put _infile_;
-  run;
-  %let stpcode=&frefin.2;
-%end;
+/* write header XML */
+data _null_;
+  file &frefin;
+  put "<UpdateMetadata><Reposid>$METAREPOSITORY</Reposid>
+    <Metadata><TextStore id='&tsuri' StoredText='";
+run;
 
 /* escape code so it can be stored as XML */
-/* input file may be over 32k wide, so deal with one char at a time */
-data _null_;
-  file &frefin recfm=n;
-  infile &stpcode recfm=n;
-  input instr $CHAR1. ;
-  if _n_=1 then put "<UpdateMetadata><Reposid>$METAREPOSITORY</Reposid>
-    <Metadata><TextStore id='&tsuri' StoredText='" @@;
-  select (instr);
-    when (';') put '&#x3b;';
-    when ('&') put '&amp;';
-    when ('<') put '&lt;';
-    when ('>') put '&gt;';
-    when ("'") put '&apos;';
-    when ('"') put '&quot;';
-    when ('0A'x) put '&#x0a;';
-    when ('0D'x) put '&#x0d;';
-    when ('$') put '&#36;';
-    otherwise put instr $CHAR1.;
-  end;
-run;
+/* write contents */
+%if %length(&stpcode)>2 %then %do;
+  data _null_;
+    file &frefin mod;
+    infile &stpcode lrecl=32767;
+    length outstr $32767;
+    input outstr ;
+    /* escape code so it can be stored as XML */
+    outstr=tranwrd(_infile_,'&','&amp;');
+    outstr=tranwrd(outstr,'<','&lt;');
+    outstr=tranwrd(outstr,'>','&gt;');
+    outstr=tranwrd(outstr,"'",'&apos;');
+    outstr=tranwrd(outstr,'"','&quot;');
+    outstr=tranwrd(outstr,'0A'x,'&#x0a;');
+    outstr=tranwrd(outstr,'0D'x,'&#x0d;');
+    outstr=tranwrd(outstr,'$','&#36;');
+    %if &minify=YES %then %do;
+      outstr=cats(outstr);
+      if outstr ne '';
+      if not (outstr=:'/*' and subpad(left(reverse(outstr)),1,2)='/*');
+    %end;
+    outstr=trim(outstr);
+    put outstr '&#10;';
+  run;
+%end;
 
 data _null_;
   file &frefin mod;
@@ -121,7 +120,7 @@ run;
 %if &mdebug=1 %then %do;
   /* write the response to the log for debugging */
   data _null_;
-    infile &frefout lrecl=1048576;
+    infile &frefout lrecl=32767;
     input;
     put _infile_;
   run;
