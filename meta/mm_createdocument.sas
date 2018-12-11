@@ -78,12 +78,10 @@ data _null_;
   putlog (_all_)(=);
 run;
 
-%mf_abort(
-  iftrue= (&type = Document)
-  ,mac=mm_createdocument.sas
-  ,msg=Document &name already exists in &tree!
-)
-
+%if &type = Document %then %do;
+  %put Document &name already exists in &tree!;
+  %return;
+%end;
 
 /**
  * Now we can create the document
@@ -101,6 +99,10 @@ data _null_;
   put "<AddMetadata><Reposid>$METAREPOSITORY</Reposid>"/
     '<Metadata><Document IsHidden="0" PublicType="Note" UsageVersion="1000000"'/
     "  Name=" name " desc=" desc " TextRole=" textrole ">"/
+    "<Notes> "/
+    '  <TextStore IsHidden="0"  Name=' name ' UsageVersion="0" '/
+    '    TextRole="SourceCode" StoredText="hello world" />' /
+    '</Notes>'/
     /*URI="Document for public note" */
     "<Trees><Tree ObjRef=" treeuri "/></Trees>"/
     "</Document></Metadata><NS>SAS</NS>"/
