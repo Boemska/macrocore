@@ -100,7 +100,9 @@ run;
 
 filename &frefout temp;
 
-proc metadata in= &frefin out=&frefout verbose;
+proc metadata in= &frefin out=&frefout
+  %if &mdebug=1 %then verbose;
+;
 run;
 
 %if &mdebug=1 %then %do;
