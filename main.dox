@@ -1,6 +1,6 @@
 
 /** \dir .
- *  \brief "Open Source Macro Library for Developers of the SAS Language."
+ *  \brief Open Source Macro Library for Developers of the SAS Language.
  *  \details To use - add the subfolders to your `SASAUTOS` call path.
  */
 
