@@ -6,7 +6,7 @@
 
 
 /*! \dir base
- *  \brief Regular Base SAS macros
+ *  \brief Regular Base SAS Macros
  *  \details These macros have the following attributes:
 
         * OS independent
@@ -16,7 +16,7 @@
  */
 
 /*! \dir meta
- *  \brief Metadata Aware macros
+ *  \brief Metadata Aware Macros
  *  \details These macros have the following attributes:
 
         * OS independent
