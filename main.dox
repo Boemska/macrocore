@@ -1,6 +1,6 @@
 
 /** \dir .
- *  \brief Open Source Macro Library for Developers of the SAS Language.
+ *  \brief Open Source Macro Library for Developers of the SAS Language.  See: https://github.com/Boemska/macrocore
  *  \details To use - add the subfolders to your `SASAUTOS` call path.
  */
 
