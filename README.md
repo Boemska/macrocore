@@ -37,6 +37,13 @@ options insert=(sasautos="/your/path/macrocore/meta");
 
 The above can be done directly in your sas program, via an autoexec, or an initialisation program.
 
+Alternatively - for quick access - simply run the following!  This file contains all the macros.
+
+```
+filename mc url "https://raw.githubusercontent.com/Boemska/macrocore/master/macrocore.sas";
+%inc mc;
+```
+
 # Standards
 
 ## File Properties
