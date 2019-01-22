@@ -36,9 +36,8 @@
   %if &dsid > 0 %then %do;
     /* Get variable number */
     %let vnum = %sysfunc(varnum(&dsid, &var));
-    %if(&vnum > 0) %then
-       /* Get variable format */
-       %let vlen = %sysfunc(varlen(&dsid, &vnum));
+    /* Get variable format */
+    %if(&vnum > 0) %then %let vlen = %sysfunc(varlen(&dsid, &vnum));
     %else %do;
        %put NOTE: Variable &var does not exist in &libds;
        %let vlen = %str( );
