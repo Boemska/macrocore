@@ -5,17 +5,22 @@
   Usage:
 
       data test;
-         format str $1.  num datetime19.;
+         format str1 $1.  num1 datetime19.;
+         str2='hello mum!'; num2=666;
          stop;
       run;
-      %put %mf_getVarFormat(test,str);
-      %put %mf_getVarFormat(work.test,num);
+      %put %mf_getVarFormat(test,str1);
+      %put %mf_getVarFormat(work.test,num1);
+      %put %mf_getVarFormat(test,str2,force=1);
+      %put %mf_getVarFormat(work.test,num2,force=1);
       %put %mf_getVarFormat(test,renegade);
 
   returns:
 
       $1.
       DATETIME19.
+      $10.
+      8.
       NOTE: Variable renegade does not exist in test
 
   @param libds Two part dataset (or view) reference.
@@ -42,6 +47,7 @@
     %if(&vnum > 0) %then %let vformat=%sysfunc(varfmt(&dsid, &vnum));
     %else %do;
        %put NOTE: Variable &var does not exist in &libds;
+       %let rc = %sysfunc(close(&dsid));
        %return;
     %end;
   %end;
