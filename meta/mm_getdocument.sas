@@ -13,8 +13,6 @@
 
   <h4> Dependencies </h4>
   @li mf_abort.sas
-  @li mf_verifymacvars.sas
-
 
   @param tree= The metadata path of the document
   @param name= Document object name.
@@ -38,8 +36,6 @@
 %else %let mD=%str(*);
 %&mD.put Executing &sysmacroname..sas;
 %&mD.put _local_;
-
-%mf_verifymacvars(tree name)
 
 /**
  * check tree exists
