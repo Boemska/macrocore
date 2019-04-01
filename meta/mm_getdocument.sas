@@ -103,7 +103,7 @@ data _null_;
  filein = fopen("__getdoc","I",1,"B");
  fileid = fopen("__outdoc","O",1,"B");
  rec = "20"x;
- length entity $5;
+ length entity $6;
  do while(fread(filein)=0);
    x+1;
    if x>&start then do;
