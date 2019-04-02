@@ -33,7 +33,8 @@
     /* extract log error / warning, if exist */
     %local logloc logline;
     %global logmsg; /* capture global messages */
-    %let logloc=&SYSPRINTTOLOG;
+    %if %symexist(SYSPRINTTOLOG) %then %let logloc=&SYSPRINTTOLOG;
+    %else %let logloc=%qsysfunc(getoption(LOG));
     proc printto log=log;run;
     %if %length(&logloc)>0 %then %do;
       %let logline=0;

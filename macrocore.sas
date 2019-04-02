@@ -49,7 +49,8 @@
     /* extract log error / warning, if exist */
     %local logloc logline;
     %global logmsg; /* capture global messages */
-    %let logloc=&SYSPRINTTOLOG;
+    %if %symexist(SYSPRINTTOLOG) %then %let logloc=&SYSPRINTTOLOG;
+    %else %let logloc=%qsysfunc(getoption(LOG));
     proc printto log=log;run;
     %if %length(&logloc)>0 %then %do;
       %let logline=0;
@@ -551,21 +552,27 @@
   Usage:
 
       data test;
-         format str $1.  num datetime19.;
+         format str1 $1.  num1 datetime19.;
+         str2='hello mum!'; num2=666;
          stop;
       run;
-      %put %mf_getVarFormat(test,str);
-      %put %mf_getVarFormat(work.test,num);
+      %put %mf_getVarFormat(test,str1);
+      %put %mf_getVarFormat(work.test,num1);
+      %put %mf_getVarFormat(test,str2,force=1);
+      %put %mf_getVarFormat(work.test,num2,force=1);
       %put %mf_getVarFormat(test,renegade);
 
   returns:
 
       $1.
       DATETIME19.
+      $10.
+      8.
       NOTE: Variable renegade does not exist in test
 
   @param libds Two part dataset (or view) reference.
   @param var Variable name for which a format should be returned
+  @param force Set to 1 to supply a default if the variable has no format
   @returns outputs format
 
   @author Allan Bowe
@@ -575,8 +582,9 @@
 
 %macro mf_getVarFormat(libds /* two level ds name */
       , var /* variable name from which to return the format */
+      , force=0
 )/*/STORE SOURCE*/;
-  %local dsid vnum vformat rc;
+  %local dsid vnum vformat rc vlen vtype;
   /* Open dataset */
   %let dsid = %sysfunc(open(&libds));
   %if &dsid > 0 %then %do;
@@ -586,10 +594,23 @@
     %if(&vnum > 0) %then %let vformat=%sysfunc(varfmt(&dsid, &vnum));
     %else %do;
        %put NOTE: Variable &var does not exist in &libds;
-       %let vformat = %str( );
+       %let rc = %sysfunc(close(&dsid));
+       %return;
     %end;
   %end;
-  %else %put dataset &libds not opened! (rc=&dsid);
+  %else %do;
+    %put dataset &libds not opened! (rc=&dsid);
+    %return;
+  %end;
+
+  /* supply a default if no format available */
+  %if %length(&vformat)<2 & &force=1 %then %do;
+    %let vlen = %sysfunc(varlen(&dsid, &vnum));
+    %let vtype = %sysfunc(vartype(&dsid, &vnum.));
+    %if &vtype=C %then %let vformat=$&vlen..;
+    %else %let vformat=8.;
+  %end;
+
 
   /* Close dataset */
   %let rc = %sysfunc(close(&dsid));
@@ -3638,6 +3659,152 @@ run;
 %mend;
 /**
   @file
+  @brief Writes the TextStore of a Document Object to an external file
+  @details If the document exists, and has a textstore object, the contents
+    of that textstore are written to an external file.
+
+  usage:
+
+      %mm_getdocument(tree=/some/meta/path
+        ,name=someDocument
+        ,outref=/some/unquoted/filename.ext
+      )
+
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
+
+  @param tree= The metadata path of the document
+  @param name= Document object name.
+  @param outref= full and unquoted path to the desired text file.  This will be
+    overwritten if it already exists.
+
+  @author Allan Bowe
+  @copyright GNU GENERAL PUBLIC LICENSE v3
+
+**/
+
+%macro mm_getdocument(
+    tree=/User Folders/sasdemo
+    ,name=myNote
+    ,outref=%sysfunc(pathname(work))/mm_getdocument.txt
+    ,mDebug=1
+    );
+
+%local mD;
+%if &mDebug=1 %then %let mD=;
+%else %let mD=%str(*);
+%&mD.put Executing &sysmacroname..sas;
+%&mD.put _local_;
+
+/**
+ * check tree exists
+ */
+
+data _null_;
+  length type uri $256;
+  rc=metadata_pathobj("","&tree","Folder",type,uri);
+  call symputx('type',type,'l');
+  call symputx('treeuri',uri,'l');
+run;
+
+%mf_abort(
+  iftrue= (&type ne Tree)
+  ,mac=mm_getdocument.sas
+  ,msg=Tree &tree does not exist!
+)
+
+/**
+ * Check object exists
+ */
+data _null_;
+  length type docuri tsuri tsid $256 ;
+  rc1=metadata_pathobj("","&tree/&name","Note",type,docuri);
+  rc2=metadata_getnasn(docuri,"Notes",1,tsuri);
+  rc3=metadata_getattr(tsuri,"Id",tsid);
+  call symputx('type',type,'l');
+  call symputx("tsid",tsid,'l');
+  putlog (_all_)(=);
+run;
+
+%mf_abort(
+  iftrue= (&type ne Document)
+  ,mac=mm_getdocument.sas
+  ,msg=Document &name could not be found in &tree!
+)
+
+/**
+ * Now we can extract the textstore
+ */
+filename __getdoc temp lrecl=10000000;
+proc metadata
+ in="<GetMetadata><Reposid>$METAREPOSITORY</Reposid>
+    <Metadata><TextStore Id='&tsid'/></Metadata>
+    <Ns>SAS</Ns><Flags>1</Flags><Options/></GetMetadata>"
+ out=__getdoc ;
+run;
+
+/* find the beginning of the text */
+data _null_;
+  infile __getdoc lrecl=10000;
+  input;
+  start=index(_infile_,'StoredText="');
+  if start then do;
+    call symputx("start",start+11);
+    put start= "type=&type";
+    putlog '"' _infile_ '"';
+  end;
+  stop;
+
+/* read the content, byte by byte, resolving escaped chars */
+filename __outdoc "&outref" lrecl=100000;
+data _null_;
+ length filein 8 fileid 8;
+ filein = fopen("__getdoc","I",1,"B");
+ fileid = fopen("__outdoc","O",1,"B");
+ rec = "20"x;
+ length entity $6;
+ do while(fread(filein)=0);
+   x+1;
+   if x>&start then do;
+    rc = fget(filein,rec,1);
+    if rec='"' then leave;
+    else if rec="&" then do;
+      entity=rec;
+      do until (rec=";");
+        if fread(filein) ne 0 then goto getout;
+        rc = fget(filein,rec,1);
+        entity=cats(entity,rec);
+      end;
+      select (entity);
+        when ('&amp;' ) rec='&'  ;
+        when ('&lt;'  ) rec='<'  ;
+        when ('&gt;'  ) rec='>'  ;
+        when ('&apos;') rec="'"  ;
+        when ('&quot;') rec='"'  ;
+        when ('&#x0a;') rec='0A'x;
+        when ('&#x0d;') rec='0D'x;
+        when ('&#36;' ) rec='$'  ;
+        otherwise putlog "WARNING: missing value for " entity=;
+      end;
+      rc =fput(fileid, substr(rec,1,1));
+      rc =fwrite(fileid);
+    end;
+    else do;
+      rc =fput(fileid,rec);
+      rc =fwrite(fileid);
+    end;
+   end;
+ end;
+ getout:
+ rc=fclose(filein);
+ rc=fclose(fileid);
+run;
+filename __getdoc clear;
+filename __outdoc clear;
+
+%mend;
+/**
+  @file
   @brief Creates dataset with all members of a metadata group
   @details
 
@@ -4424,8 +4591,8 @@ run;
 
 filename &frefout temp;
 
-proc metadata in= &frefin out=&frefout
-  %if &mdebug=1 %then verbose;
+proc metadata in= &frefin
+  %if &mdebug=1 %then out=&frefout verbose;
 ;
 run;
 
