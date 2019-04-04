@@ -61,7 +61,7 @@ data _null_;
 run;
 
 %if &tsuri=stopifempty %then %do;
-  %put WARNING:  &tree/&stp.(StoredProcess) not found!;
+  %put WARNING:  &tree/&name.(StoredProcess) not found!;
   %return;
 %end;
 
