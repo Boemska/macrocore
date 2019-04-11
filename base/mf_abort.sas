@@ -100,7 +100,7 @@
     run;
     %let syscc=0;
     data _null_;
-      abort return 0;
+      abort cancel return 0;
     run;
     endsas;
   %end;
