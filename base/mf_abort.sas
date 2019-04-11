@@ -99,6 +99,10 @@
       rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
+    /* avoid ERROR in log */
+    filename tmp temp;
+    proc printto log=tmp;
+    run;
     data _null_;
       abort cancel 0 nolist;
     run;
