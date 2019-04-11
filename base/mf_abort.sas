@@ -100,8 +100,7 @@
     run;
     %let syscc=0;
     /* avoid ERROR in log */
-    filename tmp temp;
-    proc printto log=tmp;
+    proc printto log="%sysfunc(pathname(work))/nowhere.txt";
     run;
     data _null_;
       abort cancel 0 nolist;
