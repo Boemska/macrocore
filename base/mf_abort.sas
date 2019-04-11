@@ -99,7 +99,10 @@
       rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
-    filename _webout clear;
+/* https://blogs.sas.com/content/sgf/2017/07/28/controlling-stored-process-execution-through-request-initialization-code-injection/ */
+    data _null_;
+      abort cancel;
+    run;
     endsas;
   %end;
 
