@@ -83,7 +83,7 @@
       /* quote without quoting the quotes (which are escaped instead) */
       msg=cats('"',msg,'"');
       if symexist('_debug') then debug=symget('_debug');
-      put "--h54s-data-start--";
+      if debug=131 then put "--h54s-data-start--";
       put '{"abort" : [{';
       put ' "MSG":' msg ;
       put ' ,"MAC": "' "&mac" '"}],';
@@ -95,7 +95,7 @@
       put '"executingPid" : ' "&sysjobid." ',';
       put '"sasDatetime" : ' sasdatetime ',';
       put '"status" : "success"}';
-      put "--h54s-data-end--";
+      if debug=131 then put "--h54s-data-end--";
       rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
