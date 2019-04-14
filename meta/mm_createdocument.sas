@@ -28,7 +28,6 @@
   @param mDebug= set to 1 to show debug messages in the log
 
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 

@@ -20,7 +20,6 @@
     overwritten if it already exists.
 
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 

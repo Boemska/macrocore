@@ -28,7 +28,6 @@
 
   @version 9.4
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 

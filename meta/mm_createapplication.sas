@@ -13,6 +13,8 @@
         ,params= name1=value1&#x0a;name2=value2&#x0a;emptyvalue=
       )
 
+  @warning application components do not get deleted when removing the container folder!  be sure you have the administrative priviliges to remove this kind of metadata from the SMC plugin (or be ready to do to so programmatically).
+
   <h4> Dependencies </h4>
   @li mf_abort.sas
   @li mf_verifymacvars.sas
@@ -34,7 +36,6 @@
   @param mDebug= set to 1 to show debug messages in the log
 
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 

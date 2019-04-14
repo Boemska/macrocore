@@ -25,7 +25,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mp_ds2cards(base_ds=, tgt_ds=

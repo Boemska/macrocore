@@ -29,7 +29,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_abort(mac=mf_abort.sas, type=, msg=, iftrue=%str(1=1)
@@ -115,13 +114,19 @@
       rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
-    filename _webout clear;
+    /* avoid ERROR in log */
+    proc printto log="%sysfunc(pathname(work))/nowhere.txt";
+    run;
+    data _null_;
+      abort cancel 0 nolist;
+    run;
     endsas;
   %end;
 
   %put _all_;
   %abort cancel;
-%mend;/**
+%mend;
+/**
   @file
   @brief Checks whether a dataset OR a view exists.
   @details Can be used in open code, eg as follows:
@@ -138,7 +143,6 @@
   @warning Untested on tables registered in metadata but not physically present
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_existds(libds
@@ -160,7 +164,6 @@
   @param var (positional) - variable name
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_existvar(libds /* 2 part dataset name */
@@ -195,7 +198,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_existvarlist(libds, varlist
@@ -251,7 +253,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getattrn(
@@ -292,7 +293,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getEngine(libref
@@ -337,7 +337,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getfilesize(fpath=,libds=0,format=NO
@@ -375,7 +374,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getkeyvalue(key,libds=work.mp_setkeyvalue
@@ -412,7 +410,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 
@@ -462,7 +459,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getuser(type=META
@@ -499,7 +495,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getvalue(libds,variable,filter=1
@@ -528,7 +523,7 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_getvarcount(libds
@@ -577,7 +572,6 @@
 
   @author Allan Bowe
   @version 9.2
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getVarFormat(libds /* two level ds name */
@@ -642,7 +636,7 @@
 
   @author Allan Bowe
   @version 9.2
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_getVarLen(libds /* two level ds name */
@@ -684,7 +678,7 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_getvarlist(libds
@@ -740,7 +734,7 @@ returns:
 
   @author Allan Bowe
   @version 9.2
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_getVarNum(libds /* two level ds name */
@@ -787,7 +781,7 @@ Usage:
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_getvartype(libds /* two level name */
@@ -823,7 +817,7 @@ Usage:
 
   @param dir relative or absolute pathname.  Unquoted.
   @version 9.2
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_mkdir(dir
@@ -898,7 +892,7 @@ Usage:
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_nobs(libds
@@ -913,7 +907,7 @@ Usage:
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_uid(
@@ -956,7 +950,7 @@ Usage:
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 
@@ -1011,7 +1005,7 @@ Usage:
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_wordsInStr1ButNotStr2(
@@ -1060,7 +1054,6 @@ Usage:
   @returns nothing
 
   @version 9.2
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -1120,8 +1113,6 @@ Usage:
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
-
 **/
 
 %macro mp_dirlist(path=%sysfunc(pathname(work))
@@ -1183,7 +1174,6 @@ run;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -1233,7 +1223,6 @@ run;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -1273,7 +1262,6 @@ run;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mp_ds2cards(base_ds=, tgt_ds=
@@ -1482,7 +1470,6 @@ quit;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -1545,7 +1532,6 @@ create table &outds (rename=(
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mp_lib2cards(lib=
@@ -1594,7 +1580,7 @@ select distinct lowcase(memname)
   @version 9.2
   @author Allan Bowe
   @source https://github.com/Boemska/macrocore
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mp_perflog(label,libds=work.mp_perflog
@@ -1656,7 +1642,6 @@ select distinct lowcase(memname)
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -1718,7 +1703,7 @@ insert into &outds select distinct * from &append_ds;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mp_resetoption(option /* the option to reset */
@@ -1829,7 +1814,7 @@ proc sql;
   @version 9.2
   @author Allan Bowe
   @source https://github.com/Boemska/macrocore
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mp_setkeyvalue(key,value,type=C,libds=work.mp_setkeyvalue
@@ -1891,7 +1876,7 @@ proc sql;
   @version 9.2
   @author Allan Bowe
   @source https://github.com/Boemska/macrocore
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mp_stprequests(status_cd= /* $4 eg INIT or TERM */
@@ -1942,7 +1927,7 @@ proc sql;
   @version 9.2
   @author Allan Bowe
   @source https://github.com/Boemska/macrocore
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mp_stpsetup(
@@ -1984,7 +1969,7 @@ proc sql;
   @version 9.2
   @author Allan Bowe
   @source https://github.com/Boemska/macrocore
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mp_zip(
@@ -2067,7 +2052,6 @@ ods package close;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -2419,7 +2403,6 @@ run;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -2486,6 +2469,8 @@ run;
         ,params= name1=value1&#x0a;name2=value2&#x0a;emptyvalue=
       )
 
+  @warning application components do not get deleted when removing the container folder!  be sure you have the administrative priviliges to remove this kind of metadata from the SMC plugin (or be ready to do to so programmatically).
+
   <h4> Dependencies </h4>
   @li mf_abort.sas
   @li mf_verifymacvars.sas
@@ -2507,7 +2492,6 @@ run;
   @param mDebug= set to 1 to show debug messages in the log
 
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -2652,7 +2636,6 @@ run;
   @param mDebug= set to 1 to show debug messages in the log
 
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -2773,7 +2756,6 @@ run;
 
   @version 9.2
   @author Allan Bowe (inspired from Paul Homes original)
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -2955,7 +2937,6 @@ run;
 
   @version 9.3
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -3295,7 +3276,6 @@ filename &frefout temp;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -3619,7 +3599,6 @@ run;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -3679,7 +3658,6 @@ run;
     overwritten if it already exists.
 
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -3823,7 +3801,6 @@ filename __outdoc clear;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -3894,7 +3871,6 @@ filename __outdoc clear;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -3975,7 +3951,6 @@ filename __outdoc clear;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -4065,7 +4040,6 @@ libname _XML_ clear;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -4305,7 +4279,6 @@ filename __outdoc clear;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -4400,7 +4373,6 @@ run;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -4461,7 +4433,6 @@ run;
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -4549,7 +4520,6 @@ libname _XML_ clear;
 
   @version 9.4
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -4675,7 +4645,6 @@ run;
 
   @version 9.3
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
@@ -4792,7 +4761,6 @@ run;
 
   @version 9.3
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 

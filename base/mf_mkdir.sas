@@ -9,7 +9,7 @@ Usage:
 
   @param dir relative or absolute pathname.  Unquoted.
   @version 9.2
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_mkdir(dir

@@ -26,7 +26,7 @@ returns:
 
   @author Allan Bowe
   @version 9.2
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mf_getVarNum(libds /* two level ds name */

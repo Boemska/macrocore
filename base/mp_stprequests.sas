@@ -29,7 +29,7 @@
   @version 9.2
   @author Allan Bowe
   @source https://github.com/Boemska/macrocore
-  @copyright GNU GENERAL PUBLIC LICENSE v3
+
 **/
 
 %macro mp_stprequests(status_cd= /* $4 eg INIT or TERM */

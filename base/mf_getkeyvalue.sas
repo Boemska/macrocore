@@ -12,7 +12,6 @@
 
   @version 9.2
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 **/
 
 %macro mf_getkeyvalue(key,libds=work.mp_setkeyvalue

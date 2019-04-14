@@ -20,7 +20,6 @@
 
   @version 9.3
   @author Allan Bowe
-  @copyright GNU GENERAL PUBLIC LICENSE v3
 
 **/
 
