@@ -101,9 +101,12 @@
     /* avoid ERROR in log */
     proc printto log="%sysfunc(pathname(work))/nowhere.txt";
     run;
-    data _null_;
-      abort cancel 0 nolist;
-    run;
+    %if %substr(&sysvlong.,8,2)=M2 %then %do;
+      /* M2 stp server does not cope well with endsas */
+      data _null_;
+        abort cancel 0 nolist;
+      run;
+    %end;
     endsas;
   %end;
 
