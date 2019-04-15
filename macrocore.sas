@@ -4614,7 +4614,7 @@ run;
 /* clear references */
 filename __in clear;
 filename __out clear;
-libname __shake clear;
+filename __shake clear;
 
 %mend;/**
   @file
