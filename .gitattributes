@@ -1,0 +1,2 @@
+* linguist-vendored
+*.sas linguist-vendored=false
