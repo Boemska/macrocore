@@ -77,7 +77,7 @@ The **Macro Core** documentation is created using [doxygen](http://www.stack.nl/
  - author.  Author name, contact details optional
  - copyright.  Must be GNU GENERAL PUBLIC LICENSE v3.
 
-All macros must be commented in the doxygen format, to enable the [online documentation](https://rawsas.github.io/coredoc/files.html).
+All macros must be commented in the doxygen format, to enable the [online documentation](https://boemska.github.io/macrocore.github.io/).
 
 ## Coding Standards
 
