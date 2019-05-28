@@ -48,7 +48,7 @@
 %end;
 %else %do;
   data &outds (keep=groupuri groupname groupdesc);
-    length uri groupuri groupname groupdesc $256;
+    length uri groupuri groupname groupdesc group_or_role $256;
     call missing(of _all_);
     rc=metadata_getnobj("omsobj:Person?@Name='&user'",1,uri);
     if rc<=0 then do;
@@ -66,7 +66,8 @@
       rc=metadata_getattr(groupuri, "Name", groupname);
       rc=metadata_getattr(groupuri, "Desc", groupdesc);
       a+1;
-      output;
+      rc=metadata_getattr(groupuri,"PublicType",group_or_role);
+      if Group_or_Role = 'UserGroup' then output;
       grpassn=metadata_getnasn(uri,"IdentityGroups",a,groupuri);
     end;
   run;
