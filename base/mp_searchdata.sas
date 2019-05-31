@@ -1,17 +1,20 @@
 /**
   @file
-  @brief Searches all character data in a library for a particular string
+  @brief Searches all data in a library
   @details
   Scans an entire library and creates a copy of any table
-    containing a specific string in the work library.
-    Only those records containing the string are written.
+    containing a specific string or numeric value.  Only 
+    matching records are written out.
+    If both a string and numval are provided, the string
+    will take precedence.
+
   Usage:
 
       %mp_searchdata(lib=sashelp, string=Jan)
+      %mp_searchdata(lib=sashelp, numval=1)
+
 
   Outputs zero or more tables to an MPSEARCH library with specific records.
-
-  Only searches character columns!
 
   <h4> Dependencies </h4>
   @li mf_getvarlist.sas
@@ -25,13 +28,17 @@
 
 %macro mp_searchdata(lib=sashelp
   ,ds= /* this macro will be upgraded to work for single datasets also */
-  ,type=C /* this macro will be updated to work for numeric data also */
-  ,string=Jan
+  ,string= /* the query will use a contains (?) operator */
+  ,numval= /* numeric must match exactly */
   ,outloc=%sysfunc(pathname(work))/mpsearch
 )/*/STORE SOURCE*/;
 
-%local table_list table table_num table colnum col start_tm vars;
+%local table_list table table_num table colnum col start_tm vars type coltype;
 %put process began at %sysfunc(datetime(),datetime19.);
+
+
+%if &string = %then %let type=N;
+%else %let type=C;
 
 %mf_mkdir(&outloc)
 libname mpsearch "&outloc";
@@ -58,9 +65,14 @@ proc sql;
     %do colnum=1 %to %sysfunc(countw(&vars,%str( )));
       %let col=%scan(&vars,&colnum,%str( ));
       %put &col;
-      %if %mf_getvartype(&lib..&table,&col)=C %then %do;
+      %let coltype=%mf_getvartype(&lib..&table,&col);
+      %if &type=C and &coltype=C %then %do;
         /* if a char column, see if it contains the string */
         or (&col ? "&string")
+      %end;
+      %else %if &type=N and &coltype=N %then %do;
+        /* if numeric match exactly */
+        or (&col = &numval)
       %end;
     %end;
     ;

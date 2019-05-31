@@ -156,6 +156,37 @@
 
 %mend;/**
   @file
+  @brief Checks if a variable exists in a data set.
+  @details Returns 0 if the variable does NOT exist, and return the position of
+    the var if it does.
+    Usage:
+
+        %put %mf_existVar(work.someds, somevar)
+
+  @param libds (positional) - 2 part dataset or view reference
+  @param var (positional) - variable name
+  @version 9.2
+  @author Allan Bowe
+**/
+
+%macro mf_existvar(libds /* 2 part dataset name */
+      , var /* variable name */
+)/*/STORE SOURCE*/;
+
+  %local dsid rc;
+  %let dsid=%sysfunc(open(&libds,is));
+
+  %if &dsid=0 or %length(&var)=0 %then %do;
+    %put %sysfunc(sysmsg());
+      0
+  %end;
+  %else %do;
+      %sysfunc(varnum(&dsid,&var))
+      %let rc=%sysfunc(close(&dsid));
+  %end;
+
+%mend;/**
+  @file
   @brief Checks if a set of variables ALL exist in a data set.
   @details Returns 0 if ANY of the variables do not exist, or 1 if they ALL do.
     Usage:
@@ -209,37 +240,6 @@
     0
     %put Vars not found: &found;
   %end;
-%mend;/**
-  @file
-  @brief Checks if a variable exists in a data set.
-  @details Returns 0 if the variable does NOT exist, and return the position of
-    the var if it does.
-    Usage:
-
-        %put %mf_existVar(work.someds, somevar)
-
-  @param libds (positional) - 2 part dataset or view reference
-  @param var (positional) - variable name
-  @version 9.2
-  @author Allan Bowe
-**/
-
-%macro mf_existvar(libds /* 2 part dataset name */
-      , var /* variable name */
-)/*/STORE SOURCE*/;
-
-  %local dsid rc;
-  %let dsid=%sysfunc(open(&libds,is));
-
-  %if &dsid=0 or %length(&var)=0 %then %do;
-    %put %sysfunc(sysmsg());
-      0
-  %end;
-  %else %do;
-      %sysfunc(varnum(&dsid,&var))
-      %let rc=%sysfunc(close(&dsid));
-  %end;
-
 %mend;/**
   @file
   @brief Returns a numeric attribute of a dataset.
@@ -1725,18 +1725,21 @@ run;
 
 %mend;/**
   @file
-  @brief Searches all character data in a library for a particular string
+  @brief Searches all data in a library
   @details
   Scans an entire library and creates a copy of any table
-    containing a specific string in the work library.
-    Only those records containing the string are written.
+    containing a specific string or numeric value.  Only 
+    matching records are written out.
+    If both a string and numval are provided, the string
+    will take precedence.
+
   Usage:
 
       %mp_searchdata(lib=sashelp, string=Jan)
+      %mp_searchdata(lib=sashelp, numval=1)
+
 
   Outputs zero or more tables to an MPSEARCH library with specific records.
-
-  Only searches character columns!
 
   <h4> Dependencies </h4>
   @li mf_getvarlist.sas
@@ -1750,13 +1753,17 @@ run;
 
 %macro mp_searchdata(lib=sashelp
   ,ds= /* this macro will be upgraded to work for single datasets also */
-  ,type=C /* this macro will be updated to work for numeric data also */
-  ,string=Jan
+  ,string= /* the query will use a contains (?) operator */
+  ,numval= /* numeric must match exactly */
   ,outloc=%sysfunc(pathname(work))/mpsearch
 )/*/STORE SOURCE*/;
 
-%local table_list table table_num table colnum col start_tm vars;
+%local table_list table table_num table colnum col start_tm vars type coltype;
 %put process began at %sysfunc(datetime(),datetime19.);
+
+
+%if &string = %then %let type=N;
+%else %let type=C;
 
 %mf_mkdir(&outloc)
 libname mpsearch "&outloc";
@@ -1783,9 +1790,14 @@ proc sql;
     %do colnum=1 %to %sysfunc(countw(&vars,%str( )));
       %let col=%scan(&vars,&colnum,%str( ));
       %put &col;
-      %if %mf_getvartype(&lib..&table,&col)=C %then %do;
+      %let coltype=%mf_getvartype(&lib..&table,&col);
+      %if &type=C and &coltype=C %then %do;
         /* if a char column, see if it contains the string */
         or (&col ? "&string")
+      %end;
+      %else %if &type=N and &coltype=N %then %do;
+        /* if numeric match exactly */
+        or (&col = &numval)
       %end;
     %end;
     ;
@@ -1797,7 +1809,8 @@ proc sql;
 
 %put process finished at %sysfunc(datetime(),datetime19.);
 
-%mend;/**
+%mend;
+/**
   @file
   @brief Logs a key value pair a control dataset
   @details If the dataset does not exist, it is created.  Usage:
