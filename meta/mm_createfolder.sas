@@ -86,11 +86,14 @@ run;
 /* now create the folder */
 
 filename __newdir temp;
-
-proc metadata in="<AddMetadata><Reposid>$METAREPOSITORY</Reposid><Metadata>
+options noquotelenmax;
+%local inmeta;
+%let inmeta=<AddMetadata><Reposid>$METAREPOSITORY</Reposid><Metadata>
   <Tree Name='&child' PublicType='Folder' TreeType='BIP Folder' UsageVersion='1000000'>
   <ParentTree><Tree ObjRef='&parentFolderObjId'/></ParentTree></Tree></Metadata>
-  <NS>SAS</NS><Flags>268435456</Flags></AddMetadata>"
+  <NS>SAS</NS><Flags>268435456</Flags></AddMetadata>;
+
+proc metadata in="&inmeta"
   out=__newdir verbose;
 run;
 
