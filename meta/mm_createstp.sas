@@ -89,7 +89,7 @@
     ,streaming=true
     ,outds=work.mm_createstp
     ,mDebug=0
-    ,server=SASApp - Logical Stored Process Server
+    ,server=SASApp
     ,stptype=1
     ,minify=NO
     ,frefin=mm_in
@@ -142,7 +142,7 @@ run;
   %return;
 %end;
 
-%if stptype=1 %then %do;
+%if &stptype=1 %then %do;
   /* type 1 STP - where code is stored on filesystem */
   %if %sysevalf(&sysver lt 9.2) %then %do;
     %put WARNING: Version 9.2 or later required;
@@ -304,6 +304,7 @@ run;
     rc=metadata_resolve("omsobj:ServerContext?@Name='&server'",type,uri);
     call symputx('servertype',type,'l');
     call symputx('serveruri',uri,'l');
+    put type= uri=;
   run;
   %if &servertype ne ServerContext %then %do;
     %put WARNING: ServerContext *&server* not found!;
