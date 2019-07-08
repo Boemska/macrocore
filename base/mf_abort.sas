@@ -83,7 +83,7 @@
       msg=cats('"',msg,'"');
       if symexist('_debug') then debug=symget('_debug');
       if debug=131 then put "--h54s-data-start--";
-      put '{"abort" : [{';
+      put '{"h54sAbort" : [{';
       put ' "MSG":' msg ;
       put ' ,"MAC": "' "&mac" '"}],';
       put '"usermessage" : ' usermessage ',';
@@ -98,9 +98,6 @@
       rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
-    /* avoid ERROR in log */
-    proc printto log="%sysfunc(pathname(work))/nowhere.txt";
-    run;
     %if %substr(&sysvlong.,8,2)=M2 %then %do;
       /* M2 stp server does not cope well with endsas */
       data _null_;
