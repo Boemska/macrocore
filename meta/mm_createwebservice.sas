@@ -10,13 +10,20 @@
 
     Usage:
 
-      data _null_;
-        file "%sysfunc(pathname(work))/someprogram.sas";
-        put '%put hello world!;';
+      filename ft15f001 "%sysfunc(pathname(work))/MyNewSTP.sas";
+      parmcards4;
+      * enter stored process code below ;
+      data outdataset;
+        hello='world!';
       run;
 
+      %bafheader()
+      %bafoutdataset(forJS,work,outdataset)
+      %baffooter()
+      ;;;;
+
       %mm_createwebservice(service=MyNewSTP
-        ,source=%sysfunc(pathname(work))/someprogram.sas
+        ,source=%sysfunc(pathname(work))/MyNewSTP.sas
         ,project=/User Folders/sasdemo/myapp
         ,role=common
       )
