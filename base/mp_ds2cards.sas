@@ -21,6 +21,7 @@
   @param cards_file= Location in which to write the (.sas) cards file
   @param maxobs= to limit output to the first <code>maxobs</code> observations
   @param showlog= whether to show generated cards file in the SAS log (YES/NO)
+  @param outencoding= provide encoding value for file statement (eg utf-8)
 
 
   @version 9.2
@@ -32,8 +33,9 @@
     ,maxobs=max
     ,random_sample=NO
     ,showlog=YES
+    ,outencoding=
 )/*/STORE SOURCE*/;
-  %local i setds nvars;
+%local i setds nvars;
 
 %if not %sysfunc(exist(&base_ds)) %then %do;
    %put WARNING:  &base_ds does not exist;
@@ -43,6 +45,7 @@
 %if %index(&base_ds,.)=0 %then %let base_ds=WORK.&base_ds;
 %if (&tgt_ds = ) %then %let tgt_ds=&base_ds;
 %if %index(&tgt_ds,.)=0 %then %let tgt_ds=WORK.%scan(&base_ds,2,.);
+%if ("&outencoding" ne "") %then %let outencoding=encoding="&outencoding";
 
 /* get varcount */
 %let nvars=0;
@@ -138,7 +141,7 @@ data _null_;
 run;
 
 data _null_;
-  file &cards_file. lrecl=32767 termstr=nl;
+  file &cards_file. &outencoding lrecl=32767 termstr=nl;
   length __attrib $32767;
   if _n_=1 then do;
     put '/*******************************************************************';
