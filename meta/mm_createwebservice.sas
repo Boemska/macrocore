@@ -95,6 +95,7 @@ data _null_;
   infile __h54s end=last;
   input;
   put _infile_;
+  if last then put '%bafGetDatasets()';
 run;
 filename __h54s clear;
 
@@ -110,7 +111,6 @@ filename __h54s clear;
 
 /* add the SAS program */
 data _null_;
-  if _n_=1 then put '%bafGetDatasets()';
   file "&work/&tmpfile" lrecl=3000 mod;
   infile "&source";
   input;
