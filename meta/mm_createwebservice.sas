@@ -48,6 +48,7 @@
     name does not work when the name contains spaces.
   @param desc= Service description (optional)
   @param source= /the/full/path/name.ext of the sas program to load
+  @param precode= /the/full/path/name.ext of any precode to insert.
   @param server= The server which will run the STP.  Server name or uri is fine.
   @param mDebug= set to 1 to show debug messages in the log
 
@@ -63,6 +64,7 @@
     ,service=myFirstWebService
     ,desc=This stp was created automatically by the mm_createwebservice macro
     ,source=
+    ,precode=
     ,mDebug=0
     ,server=SASApp
 )/*/STORE SOURCE*/;
@@ -93,12 +95,22 @@ data _null_;
   infile __h54s end=last;
   input;
   put _infile_;
-  if last then put '%bafGetDatasets()';
 run;
 filename __h54s clear;
 
+/* add precode if provided */
+%if %length(&precode)>0 %then %do;
+  data _null_;
+    file "&work/&tmpfile" lrecl=3000 mod;
+    infile "&precode";
+    input;
+    put _infile_;
+  run;
+%end;
+
 /* add the SAS program */
 data _null_;
+  if _n_=1 then put '%bafGetDatasets()';
   file "&work/&tmpfile" lrecl=3000 mod;
   infile "&source";
   input;

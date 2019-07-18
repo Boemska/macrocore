@@ -3694,22 +3694,29 @@ run;
 
     Usage:
 
-      filename ft15f001 "%sysfunc(pathname(work))/MyNewSTP.sas";
+      * compile macros ;
+      filename mc url "https://raw.githubusercontent.com/Boemska/macrocore/master/macrocore.sas";
+      %inc mc;
+
+      * parmcards lets us write to a text file from open code ;
+      filename ft15f001 "%sysfunc(pathname(work))/somefile.sas";
       parmcards4;
       * enter stored process code below ;
-      data outdataset;
-        hello='world!';
-      run;
+      proc sql;
+      create table outdataset as
+        select * from sashelp.class;
 
+      * output macros for every dataset to send back ;
       %bafheader()
       %bafoutdataset(forJS,work,outdataset)
       %baffooter()
       ;;;;
 
+      * create the stored process ;
       %mm_createwebservice(service=MyNewSTP
-        ,source=%sysfunc(pathname(work))/MyNewSTP.sas
-        ,project=/User Folders/sasdemo/myapp
         ,role=common
+        ,project=/User Folders/sasdemo/myapp
+        ,source=%sysfunc(pathname(work))/somefile.sas
       )
 
 
@@ -3718,13 +3725,14 @@ run;
   @li mf_getuser.sas
 
 
-  @param project= The path to the project root in metadata
+  @param project= The metadata project directory root
   @param role= The name of the role (subfolder) within the project
   @param service= Stored Process name.  Avoid spaces - testing has shown that
     the check to avoid creating multiple STPs in the same folder with the same
     name does not work when the name contains spaces.
   @param desc= Service description (optional)
   @param source= /the/full/path/name.ext of the sas program to load
+  @param precode= /the/full/path/name.ext of any precode to insert.
   @param server= The server which will run the STP.  Server name or uri is fine.
   @param mDebug= set to 1 to show debug messages in the log
 
@@ -3740,6 +3748,7 @@ run;
     ,service=myFirstWebService
     ,desc=This stp was created automatically by the mm_createwebservice macro
     ,source=
+    ,precode=
     ,mDebug=0
     ,server=SASApp
 )/*/STORE SOURCE*/;
@@ -3770,12 +3779,22 @@ data _null_;
   infile __h54s end=last;
   input;
   put _infile_;
-  if last then put '%bafGetDatasets()';
 run;
 filename __h54s clear;
 
+/* add precode if provided */
+%if %length(&precode)>0 %then %do;
+  data _null_;
+    file "&work/&tmpfile" lrecl=3000 mod;
+    infile "&precode";
+    input;
+    put _infile_;
+  run;
+%end;
+
 /* add the SAS program */
 data _null_;
+  if _n_=1 then put '%bafGetDatasets()';
   file "&work/&tmpfile" lrecl=3000 mod;
   infile "&source";
   input;
