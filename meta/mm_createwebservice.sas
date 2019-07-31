@@ -49,6 +49,8 @@
   @param desc= Service description (optional)
   @param source= /the/full/path/name.ext of the sas program to load
   @param precode= /the/full/path/name.ext of any precode to insert.
+  @param adapter= omit this parameter to use the Boemska h54s adapter macros
+    (assumes internet access) else provide the path to a local copy
   @param server= The server which will run the STP.  Server name or uri is fine.
   @param mDebug= set to 1 to show debug messages in the log
 
@@ -65,6 +67,7 @@
     ,desc=This stp was created automatically by the mm_createwebservice macro
     ,source=
     ,precode=
+    ,adapter=h54s
     ,mDebug=0
     ,server=SASApp
 )/*/STORE SOURCE*/;
@@ -85,19 +88,25 @@
 %let tmpfile=__mm_createwebservice.temp;
 
 /* get adapter code */
-filename __h54s url
-  "https://raw.githubusercontent.com/Boemska/h54s/development/sasautos/h54s.sas";
+%if &adapter=h54s %then %do;
+  filename __adaptr url
+    "https://raw.githubusercontent.com/Boemska/h54s/development/sasautos/h54s.sas";
+%end;
+%else %do;
+  filename __adaptr "&adapter";
+%end;
+
 data _null_;
   if _n_=1 then do;
     put "/* Created on %sysfunc(today(),datetime19.) by %mf_getuser() */";
   end;
   file "&work/&tmpfile" lrecl=3000;
-  infile __h54s end=last;
+  infile __adaptr end=last;
   input;
   put _infile_;
   if last then put '%bafGetDatasets()';
 run;
-filename __h54s clear;
+filename __adaptr clear;
 
 /* add precode if provided */
 %if %length(&precode)>0 %then %do;
