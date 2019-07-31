@@ -88,7 +88,7 @@
 %let tmpfile=__mm_createwebservice.temp;
 
 /* get adapter code */
-%if &adapter=h54s %then %do;
+%if "&adapter"="h54s" %then %do;
   filename __adaptr url
     "https://raw.githubusercontent.com/Boemska/h54s/development/sasautos/h54s.sas";
 %end;
