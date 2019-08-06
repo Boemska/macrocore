@@ -119,8 +119,11 @@ data _null_;
   call symputx("&refresh_token_var",refresh_token);
 run;
 
-%put &=&access_token_var;
-%put &=&refresh_token_var;
+%put ;
+%put &access_token_var=&&&access_token_var;
+%put ;
+%put &refresh_token_var=&&&refresh_token_var;
+%put ;
 
 libname &libref clear;
 filename &fref1 clear;
