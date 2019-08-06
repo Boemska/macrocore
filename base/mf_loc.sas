@@ -13,12 +13,18 @@
 
 %macro mf_loc(loc);
 %let loc=%upcase(&loc);
+%local root;
 
 %if &loc=POF or &loc=PLATFORMOBJECTFRAMEWORK %then %do;
-  %local root;
   %let root=%substr(%sysget(SASROOT),1,%index(%sysget(SASROOT),SASFoundation)-2);
   %let root=&root/SASPlatformObjectFramework/&sysver;
   %put Batch tools located at: &root;
+  &root
+%end;
+%else %if &loc=VIYACONFIG %then %do;
+  %let root=/opt/sas/viya/config;
+  %let root=&root/config/etc/SASSecurityCertificateFramework/tokens/consul/default;
+  %put Viya Config located at: &root;
   &root
 %end;
 
