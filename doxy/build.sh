@@ -35,3 +35,5 @@ mv $BUILD_FOLDER/out/doxy/* .
 git add *
 git commit -m "build.sh build on $(date +%F:%H:%M:%S)"
 git push
+
+echo "check it out:  https://boemska.github.io/macrocore.github.io/files.html"

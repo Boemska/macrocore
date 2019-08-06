@@ -7,7 +7,7 @@ FILE_PATTERNS          = *.sas \
                          *.ddl \
                          *.dox
 GENERATE_LATEX         = NO
-GENERATE_TREEVIEW      = YES 
+GENERATE_TREEVIEW      = YES
 HIDE_FRIEND_COMPOUNDS  = YES
 HIDE_IN_BODY_DOCS      = YES
 HIDE_SCOPE_NAMES       = YES
@@ -19,7 +19,7 @@ HTML_FOOTER            = ./doxy/new_footer.html
 HTML_EXTRA_STYLESHEET  = ./doxy/new_stylesheet.css
 INHERIT_DOCS           = NO
 INLINE_INFO            = NO
-INPUT                  = base meta
+INPUT                  = base meta viya xcmd
 LAYOUT_FILE            = ./doxy/DoxygenLayout.xml
 MAX_INITIALIZER_LINES  = 0
 PROJECT_NAME           = Macro Core
