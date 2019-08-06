@@ -4,7 +4,6 @@
   @details Returns location of the PlatformObjectFramework tools
     Usage:
 
-
       %put %mf_loc(POF); %*location of PlatformObjectFramework tools;
 
   @version 9.2

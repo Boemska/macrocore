@@ -28,7 +28,7 @@
   %let x=0;
   %do x=0 %to &maxtries;
   %if %sysfunc(libref(&prefix&x)) ne 0 %then %do;
-      %put Libref &prefix&x was available and returned by &sysmacroname;
+      %put &sysmacroname: Libref &prefix&x is available and being returned;
       &prefix&x
       %return;
   %end;
