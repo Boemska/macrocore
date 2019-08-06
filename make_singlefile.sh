@@ -26,3 +26,4 @@ EOL
 cat base/* >> $OUTFILE
 cat meta/* >> $OUTFILE
 cat xcmd/* >> $OUTFILE
+cat viya/* >> $OUTFILE
