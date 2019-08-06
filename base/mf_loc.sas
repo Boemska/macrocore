@@ -23,7 +23,6 @@
 %end;
 %else %if &loc=VIYACONFIG %then %do;
   %let root=/opt/sas/viya/config;
-  %let root=&root/config/etc/SASSecurityCertificateFramework/tokens/consul/default;
   %put Viya Config located at: &root;
   &root
 %end;
