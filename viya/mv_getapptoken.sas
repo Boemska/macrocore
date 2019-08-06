@@ -20,11 +20,9 @@
 
   @param client_id= The client name
   @param client_secret= client secret
-  @param groups= List of groups of users who will have access to the app.
-    space seperated.  The user will be prompted for each of these when logging in.
   @param grant_type= valid values are "password" or "authorization_code" (unquoted)
 
-  @version SAS 9.4M3
+  @version VIYA V.03.04
   @author Allan Bowe
   @source https://github.com/Boemska/macrocore
 
@@ -38,7 +36,6 @@
 
 %macro mv_getapptoken(client_id=someclient
     ,client_secret=somesecret
-    ,groups=*
     ,grant_type=authorization_code
   );
 %local consul_token fname1 fname2 fname3 libref access_token;
@@ -47,7 +44,7 @@
   ,mac=&sysmacroname
   ,msg=%str(Invalid value for grant_type: &grant_type)
 )
-
+options noquotelenmax;
 /* first, get consul token needed to get client id / secret */
 data _null_;
   infile "%mf_loc(VIYACONFIG)/etc/SASSecurityCertificateFramework/tokens/consul/default/client.token";
@@ -83,15 +80,14 @@ data _null_;
   clientid=quote(trim(symget('client_id')));
   clientsecret=quote(trim(symget('client_secret')));
   granttype=quote(trim(symget('grant_type')));
-  groups=symget('groups');
-  length grouplist $1024;
-  do x=1 to countw(groups);
-    grouplist=cats(grouplist,",",quote(scan(groups,x)));
-  end;
   put '{"client_id":' clientid ',"client_secret":' clientsecret
-    ',"scope": ["openid"'  grouplist
-    '],"authorized_grant_types": [' granttype ',"refresh_token"],'
+    ',"scope":"openid","authorized_grant_types": [' granttype ',"refresh_token"],'
     '"redirect_uri": "urn:ietf:wg:oauth:2.0:oob"}';
+run;
+data _null_;
+  infile &fname2;
+  input;
+  putlog _infile_;
 run;
 
 %let fname3=%mf_getuniquefileref();
@@ -113,6 +109,7 @@ run;
 %put ;
 %put CLIENT_ID=&client_id;
 %put CLIENT_SECRET=&client_secret;
+%put GRANT_TYPE=&grant_type;
 %put;
 %if &grant_type=authorization_code %then %do;
   %put The developer must also register below and select 'openid' to get the grant code:;
