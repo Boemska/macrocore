@@ -877,6 +877,21 @@ Usage:
   /* Return variable type */
   &vtype
 %mend;/**
+  @file mf_isblank
+  @brief Checks whether a macro variable is empty (blank)
+
+  @return output returns 1 (if blank) else 0
+
+  @version 9.2
+**/
+
+
+%macro mf_isblank(param
+)/*/STORE SOURCE*/;
+
+  %sysevalf(%superq(param)=,boolean)
+
+%mend;/**
   @file
   @brief Returns physical location of various SAS items
   @details Returns location of the PlatformObjectFramework tools
@@ -5351,11 +5366,374 @@ run;
 
 %mend;/**
   @file
-  @brief Get Access and Refresh Tokens
-  @details Before an access token can be obtained, the client token must be
-    registered by an administrator.  This can be done using the following macro:
+  @brief Get an additional access token using a refresh token
+  @details Before an access token can be obtained, a refresh token is required
+    For that, check out the `mv_getrefreshtoken` macro.
 
-      %mv_getapptoken(client_id=client,client_secret=secret)
+  Usage:
+
+    * prep work - register client, get refresh token, save it for later use ;
+    %let client=testin88gtss;
+    %let secret=MySecret;
+    %mv_getapptoken(client_id=&client,client_secret=&secret)
+    %mv_getrefreshtoken(client_id=&client,client_secret=&secret,code=wKDZYTEPK6)
+    data _null_;
+    file "~/refresh.token";
+    put "&refresh_token";
+    run;
+
+    * now do the things n stuff;
+    data _null_;
+      infile "~/refresh.token";
+      input;
+      call symputx('refresh_token',_infile_);
+    run;
+    %mv_getaccesstoken(client_id=&client
+      ,client_secret=&secret
+    )
+
+    A great article for explaining all these steps is available here:
+
+    https://blogs.sas.com/content/sgf/2019/01/25/authentication-to-sas-viya/
+
+  @param client_id= The client name
+  @param client_secret= client secret
+  @param grant_type= valid values are "password" or "authorization_code" (unquoted).
+    The default is authorization_code.
+  @param user= If grant_type=password then provide the username here
+  @param pass= If grant_type=password then provide the password here
+  @param access_token_var= The global macro variable to contain the access token
+  @param refresh_token_var= The global macro variable containing the refresh token
+
+  @version VIYA V.03.04
+  @author Allan Bowe
+  @source https://github.com/Boemska/macrocore
+
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
+  @li mf_getuniquefileref.sas
+
+**/
+
+%macro mv_getaccesstoken(client_id=someclient
+    ,client_secret=somesecret
+    ,grant_type=authorization_code
+    ,code=
+    ,user=
+    ,pass=
+    ,access_token_var=ACCESS_TOKEN
+    ,refresh_token_var=REFRESH_TOKEN
+  );
+%global &access_token_var &refresh_token_var;
+options noquotelenmax;
+
+%local fref1 libref;
+
+/* test the validity of inputs */
+%mf_abort(iftrue=(&grant_type ne authorization_code and &grant_type ne password)
+  ,mac=&sysmacroname
+  ,msg=%str(Invalid value for grant_type: &grant_type)
+)
+
+%mf_abort(iftrue=(&grant_type=password and (%str(&user)=%str() or %str(&pass)=%str()))
+  ,mac=&sysmacroname
+  ,msg=%str(username / password required)
+)
+
+%mf_abort(iftrue=(%str(&client)=%str() or %str(&secret)=%str())
+  ,mac=&sysmacroname
+  ,msg=%str(client / secret must both be provided)
+)
+
+
+/**
+ * Request access token
+ */
+%let fref1=%mf_getuniquefileref();
+filename &fref1 TEMP;
+proc http method='POST'
+  in="grant_type=refresh_token%nrstr(&)refresh_token=&&&refresh_token_var"
+  out=&fref1
+  url='localhost/SASLogon/oauth/token'
+  WEBUSERNAME="&client_id"
+  WEBPASSWORD="&client_secret"
+  AUTH_BASIC;
+  headers "Accept"="application/json"
+          "Content-Type"="application/x-www-form-urlencoded";
+run;
+data _null_;infile &fref1;input;put _infile_;run;
+
+/**
+ * Extract access / refresh tokens
+ */
+
+%let libref=%mf_getuniquelibref();
+libname &libref JSON fileref=&fref1;
+
+/* extract the token */
+data _null_;
+  set &libref..root;
+  call symputx("&access_token_var",access_token);
+  call symputx("&refresh_token_var",refresh_token);
+run;
+
+%put ;
+%put &access_token_var=&&&access_token_var;
+%put ;
+%put &refresh_token_var=&&&refresh_token_var;
+%put ;
+/*
+libname &libref clear;
+filename &fref1 clear;
+filename &fref2 clear;
+*/
+%mend;/**
+  @file
+  @brief Get an App Token and Secret
+  @details When building apps on SAS Viya, an app id and secret is required.
+  This macro will obtain the Consul Token and use that to call the Web Service.
+
+    more info: https://developer.sas.com/reference/auth/#register
+    and: http://proc-x.com/2019/01/authentication-to-sas-viya-a-couple-of-approaches/
+
+  The default viyaroot location is /opt/sas/viya/config
+
+  M3 required due to proc http headers
+
+  Usage:
+
+    filename mc url "https://raw.githubusercontent.com/Boemska/macrocore/master/macrocore.sas";
+    %inc mc;
+
+    %mv_getapptoken(client_id=client,client_secret=secret)
+
+  @param client_id= The client name
+  @param client_secret= client secret
+  @param grant_type= valid values are "password" or "authorization_code" (unquoted)
+
+  @version VIYA V.03.04
+  @author Allan Bowe
+  @source https://github.com/Boemska/macrocore
+
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
+  @li mf_getuniquefileref.sas
+  @li mf_getuniquelibref.sas
+  @li mf_loc.sas
+
+**/
+
+%macro mv_getapptoken(client_id=someclient
+    ,client_secret=somesecret
+    ,grant_type=authorization_code
+  );
+%local consul_token fname1 fname2 fname3 libref access_token url;
+
+%mf_abort(iftrue=(&grant_type ne authorization_code and &grant_type ne password)
+  ,mac=&sysmacroname
+  ,msg=%str(Invalid value for grant_type: &grant_type)
+)
+options noquotelenmax;
+/* first, get consul token needed to get client id / secret */
+data _null_;
+  infile "%mf_loc(VIYACONFIG)/etc/SASSecurityCertificateFramework/tokens/consul/default/client.token";
+  input token:$64.;
+  call symputx('consul_token',token);
+run;
+
+/* request the client details */
+%let fname1=%mf_getuniquefileref();
+filename &fname1 TEMP;
+proc http method='POST' out=&fname1
+    url='http://localhost/SASLogon/oauth/clients/consul?callback=false&serviceId=app';
+    headers "X-Consul-Token"="&consul_token";
+run;
+
+%let libref=%mf_getuniquelibref();
+libname &libref JSON fileref=&fname1;
+
+/* extract the token */
+data _null_;
+  set &libref..root;
+  call symputx('access_token',access_token);
+run;
+%put &=access_token;
+
+/**
+ * register the new client
+ */
+%let fname2=%mf_getuniquefileref();
+filename &fname2 TEMP;
+data _null_;
+  file &fname2;
+  clientid=quote(trim(symget('client_id')));
+  clientsecret=quote(trim(symget('client_secret')));
+  granttype=quote(trim(symget('grant_type')));
+  put '{"client_id":' clientid ',"client_secret":' clientsecret
+    ',"scope":"openid","authorized_grant_types": [' granttype ',"refresh_token"],'
+    '"redirect_uri": "urn:ietf:wg:oauth:2.0:oob"}';
+run;
+data _null_;
+  infile &fname2;
+  input;
+  putlog _infile_;
+run;
+
+%let fname3=%mf_getuniquefileref();
+filename &fname3 TEMP;
+proc http method='POST' in=&fname2 out=&fname3
+    url='http://localhost/SASLogon/oauth/clients';
+    headers "Content-Type"="application/json"
+            "Authorization"="Bearer &access_token";
+run;
+
+/* show response */
+data _null_;
+  infile &fname3;
+  input;
+  putlog _infile_;
+run;
+
+/* prepare url */
+%if &grant_type=authorization_code %then %do;
+  data _null_;
+    if symexist('_baseurl') then do;
+      url=symget('_baseurl');
+      if subpad(url,length(url)-9,9)='SASStudio'
+        then url=substr(url,1,length(url)-11);
+      else url="&systcpiphostname";
+    end;
+    else url="&systcpiphostname";
+    call symputx('url',url);
+  run;
+%end;
+
+%put Please provide the following details to the developer:;
+%put ;
+%put CLIENT_ID=&client_id;
+%put CLIENT_SECRET=&client_secret;
+%put GRANT_TYPE=&grant_type;
+%put;
+%if &grant_type=authorization_code %then %do;
+  %put The developer must also register below and select 'openid' to get the grant code:;
+  %put ;
+  %put &url/SASLogon/oauth/authorize?client_id=&client_id%str(&)response_type=code;
+  %put; %put;
+%end;
+
+/* clear refs */
+filename &fname1 clear;
+filename &fname2 clear;
+filename &fname3 clear;
+libname &libref clear;
+
+%mend;/**
+  @file mv_getfoldermembers.sas
+  @brief Gets a list of folders (and ids) for a given root
+  @details Works for both root level and below, oauth or password. Default is
+    oauth, and the token is expected in a global ACCESS_TOKEN variable.
+
+    %mv_getfoldermembers(root=/Public)
+
+
+  @param root= The path for which to return the list of folders
+  @param outds= The output dataset to create (default is work.mv_getfolders)
+  @param access_token_var= The global macro variable to contain the access token
+  @param grant_type= valid values are "password" or "authorization_code" (unquoted).
+    The default is authorization_code.
+
+
+  @version VIYA V.03.04
+  @author Allan Bowe
+  @source https://github.com/Boemska/macrocore
+
+  <h4> Dependencies </h4>
+  @li mf_abort.sas
+  @li mf_getuniquefileref.sas
+  @li mf_getuniquelibref.sas
+  @li mf_isblank.sas
+
+**/
+
+%macro mv_getfoldermembers(root=/
+    ,access_token_var=ACCESS_TOKEN
+    ,grant_type=authorization_code
+    ,outds=mv_getfolders
+  );
+
+%if %mf_isblank(&root)=1 %then %let root=/;
+
+%mf_abort(iftrue=(&grant_type ne authorization_code and &grant_type ne password)
+  ,mac=&sysmacroname
+  ,msg=%str(Invalid value for grant_type: &grant_type)
+)
+options noquotelenmax;
+
+/* request the client details */
+%local fname1 libref1;
+%let fname1=%mf_getuniquefileref();
+filename &fname1 TEMP;
+%let libref1=%mf_getuniquelibref();
+
+%if "&root"="/" %then %do;
+  /* if root just list root folders */
+  proc http method='GET' out=&fname1
+      url='http://localhost/folders/rootFolders';
+      headers "Authorization"="Bearer &&&access_token_var";
+  run;
+  libname &libref1 JSON fileref=&fname1;
+  data &outds;
+    set &libref1..items;
+  run;
+%end;
+%else %do;
+  /* first get parent folder id */
+  proc http method='GET' out=&fname1
+      url="http://localhost/folders/folders/@item?path=&root";
+      headers "Authorization"="Bearer &&&access_token_var";
+  run;
+  data _null_;infile &fname1;input;putlog _infile_;run;
+  libname &libref1 JSON fileref=&fname1;
+  /* now get the followon link to list members */
+  data _null_;
+    set &libref1..links;
+    if rel='members' then call symputx('href',quote(trim(href)),'l');
+  run;
+  %local fname2 libref2;
+  %let fname2=%mf_getuniquefileref();
+  filename &fname2 TEMP;
+  %let libref2=%mf_getuniquelibref();
+  proc http method='GET' out=&fname2
+      url=%unquote(%superq(href));
+      headers "Authorization"="Bearer &&&access_token_var";
+  run;
+  libname &libref2 JSON fileref=&fname2;
+  data &outds;
+    set &libref2..items;
+  run;
+  filename &fname2 clear;
+  libname &libref2 clear;
+%end;
+
+
+/* clear refs */
+filename &fname1 clear;
+libname &libref1 clear;
+
+%mend;/**
+  @file mv_getrefreshtoken.sas
+  @brief Get Refresh Token (and initial access token)
+  @details Before a Refresh Token can be obtained, the client must be
+    registered by an administrator.  This can be done using the
+    `mv_getapptoken` macro, after which the user must visit a URL to get an
+    additional code (if using oauth).
+
+    That code (or username / password) is used here to get the Refresh Token
+    (and an initial Access Token).  THIS MACRO CAN ONLY BE USED ONCE - further
+    access tokens can be obtained using the `mv_getaccesstoken` macro.
+
+    Access tokens expire frequently (every 10 hours or so) whilst refresh tokens
+    expire periodically (every month or so).  This is all configurable.
 
   Usage:
 
@@ -5367,11 +5745,11 @@ run;
 
     %mv_getapptoken(client_id=&client,client_secret=&secret)
 
-    %mv_getaccesstoken(client_id=&client,client_secret=&secret,code=LD39EpalOf)
+    %mv_getrefreshtoken(client_id=&client,client_secret=&secret,code=LD39EpalOf)
 
     A great article for explaining all these steps is available here:
 
-    http://proc-x.com/2019/01/authentication-to-sas-viya-a-couple-of-approaches/
+    https://blogs.sas.com/content/sgf/2019/01/25/authentication-to-sas-viya/
 
   @param client_id= The client name
   @param client_secret= client secret
@@ -5393,7 +5771,7 @@ run;
 
 **/
 
-%macro mv_getaccesstoken(client_id=someclient
+%macro mv_getrefreshtoken(client_id=someclient
     ,client_secret=somesecret
     ,grant_type=authorization_code
     ,code=
@@ -5470,137 +5848,14 @@ data _null_;
   call symputx("&refresh_token_var",refresh_token);
 run;
 
-%put &=&access_token_var;
-%put &=&refresh_token_var;
+%put ;
+%put &access_token_var=&&&access_token_var;
+%put ;
+%put &refresh_token_var=&&&refresh_token_var;
+%put ;
 
 libname &libref clear;
 filename &fref1 clear;
 filename &fref2 clear;
-
-%mend;/**
-  @file
-  @brief Get an App Token and Secret
-  @details When building apps on SAS Viya, an app id and secret is required.
-  This macro will obtain the Consul Token and use that to call the Web Service.
-
-    more info: https://developer.sas.com/reference/auth/#register
-    and: http://proc-x.com/2019/01/authentication-to-sas-viya-a-couple-of-approaches/
-
-  The default viyaroot location is /opt/sas/viya/config
-
-  M3 required due to proc http headers
-
-  Usage:
-
-    filename mc url "https://raw.githubusercontent.com/Boemska/macrocore/master/macrocore.sas";
-    %inc mc;
-
-    %mv_getapptoken(client_id=client,client_secret=secret)
-
-  @param client_id= The client name
-  @param client_secret= client secret
-  @param grant_type= valid values are "password" or "authorization_code" (unquoted)
-
-  @version VIYA V.03.04
-  @author Allan Bowe
-  @source https://github.com/Boemska/macrocore
-
-  <h4> Dependencies </h4>
-  @li mf_abort.sas
-  @li mf_getuniquefileref.sas
-  @li mf_getuniquelibref.sas
-  @li mf_loc.sas
-
-**/
-
-%macro mv_getapptoken(client_id=someclient
-    ,client_secret=somesecret
-    ,grant_type=authorization_code
-  );
-%local consul_token fname1 fname2 fname3 libref access_token;
-
-%mf_abort(iftrue=(&grant_type ne authorization_code and &grant_type ne password)
-  ,mac=&sysmacroname
-  ,msg=%str(Invalid value for grant_type: &grant_type)
-)
-options noquotelenmax;
-/* first, get consul token needed to get client id / secret */
-data _null_;
-  infile "%mf_loc(VIYACONFIG)/etc/SASSecurityCertificateFramework/tokens/consul/default/client.token";
-  input token:$64.;
-  call symputx('consul_token',token);
-run;
-
-/* request the client details */
-%let fname1=%mf_getuniquefileref();
-filename &fname1 TEMP;
-proc http method='POST' out=&fname1
-    url='http://localhost/SASLogon/oauth/clients/consul?callback=false&serviceId=app';
-    headers "X-Consul-Token"="&consul_token";
-run;
-
-%let libref=%mf_getuniquelibref();
-libname &libref JSON fileref=&fname1;
-
-/* extract the token */
-data _null_;
-  set &libref..root;
-  call symputx('access_token',access_token);
-run;
-%put &=access_token;
-
-/**
- * register the new client
- */
-%let fname2=%mf_getuniquefileref();
-filename &fname2 TEMP;
-data _null_;
-  file &fname2;
-  clientid=quote(trim(symget('client_id')));
-  clientsecret=quote(trim(symget('client_secret')));
-  granttype=quote(trim(symget('grant_type')));
-  put '{"client_id":' clientid ',"client_secret":' clientsecret
-    ',"scope":"openid","authorized_grant_types": [' granttype ',"refresh_token"],'
-    '"redirect_uri": "urn:ietf:wg:oauth:2.0:oob"}';
-run;
-data _null_;
-  infile &fname2;
-  input;
-  putlog _infile_;
-run;
-
-%let fname3=%mf_getuniquefileref();
-filename &fname3 TEMP;
-proc http method='POST' in=&fname2 out=&fname3
-    url='http://localhost/SASLogon/oauth/clients';
-    headers "Content-Type"="application/json"
-            "Authorization"="Bearer &access_token";
-run;
-
-/* show response */
-data _null_;
-  infile &fname3;
-  input;
-  putlog _infile_;
-run;
-
-%put Please provide the following details to the developer:;
-%put ;
-%put CLIENT_ID=&client_id;
-%put CLIENT_SECRET=&client_secret;
-%put GRANT_TYPE=&grant_type;
-%put;
-%if &grant_type=authorization_code %then %do;
-  %put The developer must also register below and select 'openid' to get the grant code:;
-  %put ;
-  %put &SYSTCPIPHOSTNAME/SASLogon/oauth/authorize?client_id=&client_id%str(&)response_type=code;
-  %put; %put;
-%end;
-
-/* clear refs */
-filename &fname1 clear;
-filename &fname2 clear;
-filename &fname3 clear;
-libname &libref clear;
 
 %mend;
