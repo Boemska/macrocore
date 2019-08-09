@@ -38,7 +38,7 @@
     ,client_secret=somesecret
     ,grant_type=authorization_code
   );
-%local consul_token fname1 fname2 fname3 libref access_token;
+%local consul_token fname1 fname2 fname3 libref access_token url;
 
 %mf_abort(iftrue=(&grant_type ne authorization_code and &grant_type ne password)
   ,mac=&sysmacroname
@@ -105,6 +105,20 @@ data _null_;
   putlog _infile_;
 run;
 
+/* prepare url */
+%if &grant_type=authorization_code %then %do;
+  data _null_;
+    if symexist('_baseurl') then do;
+      url=symget('_baseurl');
+      if subpad(url,length(url)-9,9)='SASStudio'
+        then url=substr(url,1,length(url)-11);
+      else url="&systcpiphostname";
+    end;
+    else url="&systcpiphostname";
+    call symputx('url',url);
+  run;
+%end;
+
 %put Please provide the following details to the developer:;
 %put ;
 %put CLIENT_ID=&client_id;
@@ -114,7 +128,7 @@ run;
 %if &grant_type=authorization_code %then %do;
   %put The developer must also register below and select 'openid' to get the grant code:;
   %put ;
-  %put &SYSTCPIPHOSTNAME/SASLogon/oauth/authorize?client_id=&client_id%str(&)response_type=code;
+  %put &url/SASLogon/oauth/authorize?client_id=&client_id%str(&)response_type=code;
   %put; %put;
 %end;
 

@@ -1,30 +1,29 @@
 /**
-  @file
-  @brief Get an additional access token using a refresh token
-  @details Before an access token can be obtained, a refresh token is required
-    For that, check out the `mv_getrefreshtoken` macro.
+  @file mv_getrefreshtoken.sas
+  @brief Get Refresh Token (and initial access token)
+  @details Before a Refresh Token can be obtained, the client must be
+    registered by an administrator.  This can be done using the
+    `mv_getapptoken` macro, after which the user must visit a URL to get an
+    additional code (if using oauth).
+
+    That code (or username / password) is used here to get the Refresh Token
+    (and an initial Access Token).  THIS MACRO CAN ONLY BE USED ONCE - further
+    access tokens can be obtained using the `mv_getaccesstoken` macro.
+
+    Access tokens expire frequently (every 10 hours or so) whilst refresh tokens
+    expire periodically (every month or so).  This is all configurable.
 
   Usage:
 
-    * prep work - register client, get refresh token, save it for later use ;
-    %let client=testin88gtss;
-    %let secret=MySecret;
-    %mv_getapptoken(client_id=&client,client_secret=&secret)
-    %mv_getrefreshtoken(client_id=&client,client_secret=&secret,code=wKDZYTEPK6)
-    data _null_;
-    file "~/refresh.token";
-    put "&refresh_token";
-    run;
+    filename mc url "https://raw.githubusercontent.com/Boemska/macrocore/master/macrocore.sas";
+    %inc mc;
 
-    * now do the things n stuff;
-    data _null_;
-      infile "~/refresh.token";
-      input;
-      call symputx('refresh_token',_infile_);
-    run;
-    %mv_getaccesstoken(client_id=&client
-      ,client_secret=&secret
-    )
+    %let client=testings;
+    %let secret=MySecret;
+
+    %mv_getapptoken(client_id=&client,client_secret=&secret)
+
+    %mv_getrefreshtoken(client_id=&client,client_secret=&secret,code=LD39EpalOf)
 
     A great article for explaining all these steps is available here:
 
@@ -34,10 +33,11 @@
   @param client_secret= client secret
   @param grant_type= valid values are "password" or "authorization_code" (unquoted).
     The default is authorization_code.
+  @param code= If grant_type=authorization_code then provide the necessary code here
   @param user= If grant_type=password then provide the username here
   @param pass= If grant_type=password then provide the password here
   @param access_token_var= The global macro variable to contain the access token
-  @param refresh_token_var= The global macro variable containing the refresh token
+  @param refresh_token_var= The global macro variable to contain the refresh token
 
   @version VIYA V.03.04
   @author Allan Bowe
@@ -49,7 +49,7 @@
 
 **/
 
-%macro mv_getaccesstoken(client_id=someclient
+%macro mv_getrefreshtoken(client_id=someclient
     ,client_secret=somesecret
     ,grant_type=authorization_code
     ,code=
@@ -59,14 +59,18 @@
     ,refresh_token_var=REFRESH_TOKEN
   );
 %global &access_token_var &refresh_token_var;
-options noquotelenmax;
 
-%local fref1 libref;
+%local fref1 fref2 libref;
 
 /* test the validity of inputs */
 %mf_abort(iftrue=(&grant_type ne authorization_code and &grant_type ne password)
   ,mac=&sysmacroname
   ,msg=%str(Invalid value for grant_type: &grant_type)
+)
+
+%mf_abort(iftrue=(&grant_type=authorization_code and %str(&code)=%str())
+  ,mac=&sysmacroname
+  ,msg=%str(Authorization code required)
 )
 
 %mf_abort(iftrue=(&grant_type=password and (%str(&user)=%str() or %str(&pass)=%str()))
@@ -79,15 +83,26 @@ options noquotelenmax;
   ,msg=%str(client / secret must both be provided)
 )
 
+/* prepare appropriate grant type */
+%let fref1=%mf_getuniquefileref();
+filename &fref1 TEMP;
+
+data _null_;
+  file &fref1;
+  if "&grant_type"='authorization_code' then string=cats(
+   'grant_type=authorization_code&code=',symget('code'));
+  else string=cats('grant_type=password&username=',symget('user')
+    ,'&password=',symget(pass));
+  call symputx('grantstring',cats("'",string,"'"));
+run;
+data _null_;infile &fref1;input;put _infile_;run;
 
 /**
  * Request access token
  */
-%let fref1=%mf_getuniquefileref();
-filename &fref1 TEMP;
-proc http method='POST'
-  in="grant_type=refresh_token%nrstr(&)refresh_token=&&&refresh_token_var"
-  out=&fref1
+%let fref2=%mf_getuniquefileref();
+filename &fref2 TEMP;
+proc http method='POST' in=&grantstring out=&fref2
   url='localhost/SASLogon/oauth/token'
   WEBUSERNAME="&client_id"
   WEBPASSWORD="&client_secret"
@@ -95,14 +110,14 @@ proc http method='POST'
   headers "Accept"="application/json"
           "Content-Type"="application/x-www-form-urlencoded";
 run;
-data _null_;infile &fref1;input;put _infile_;run;
+data _null_;infile &fref2;input;put _infile_;run;
 
 /**
  * Extract access / refresh tokens
  */
 
 %let libref=%mf_getuniquelibref();
-libname &libref JSON fileref=&fref1;
+libname &libref JSON fileref=&fref2;
 
 /* extract the token */
 data _null_;
@@ -116,9 +131,9 @@ run;
 %put ;
 %put &refresh_token_var=&&&refresh_token_var;
 %put ;
-/*
+
 libname &libref clear;
 filename &fref1 clear;
 filename &fref2 clear;
-*/
+
 %mend;
