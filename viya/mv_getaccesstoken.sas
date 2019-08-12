@@ -84,7 +84,6 @@ options noquotelenmax;
  * Request access token
  */
 %let fref1=%mf_getuniquefileref();
-filename &fref1 TEMP;
 proc http method='POST'
   in="grant_type=refresh_token%nrstr(&)refresh_token=&&&refresh_token_var"
   out=&fref1

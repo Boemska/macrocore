@@ -43,7 +43,6 @@ options noquotelenmax;
 /* request the client details */
 %local fname1 libref1;
 %let fname1=%mf_getuniquefileref();
-filename &fname1 TEMP;
 %let libref1=%mf_getuniquelibref();
 
 %if "&root"="/" %then %do;
@@ -72,7 +71,6 @@ filename &fname1 TEMP;
   run;
   %local fname2 libref2;
   %let fname2=%mf_getuniquefileref();
-  filename &fname2 TEMP;
   %let libref2=%mf_getuniquelibref();
   proc http method='GET' out=&fname2
       url=%unquote(%superq(href));

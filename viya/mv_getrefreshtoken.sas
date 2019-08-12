@@ -85,7 +85,6 @@
 
 /* prepare appropriate grant type */
 %let fref1=%mf_getuniquefileref();
-filename &fref1 TEMP;
 
 data _null_;
   file &fref1;
@@ -101,7 +100,6 @@ data _null_;infile &fref1;input;put _infile_;run;
  * Request access token
  */
 %let fref2=%mf_getuniquefileref();
-filename &fref2 TEMP;
 proc http method='POST' in=&grantstring out=&fref2
   url='localhost/SASLogon/oauth/token'
   WEBUSERNAME="&client_id"

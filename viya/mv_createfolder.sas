@@ -60,7 +60,6 @@ options noquotelenmax;
 
   %local fname1;
   %let fname1=%mf_getuniquefileref();
-  filename &fname1 TEMP;
 
   %put &sysmacroname checking to see if &newpath exists;
   proc http method='GET' out=&fname1

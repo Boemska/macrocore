@@ -54,7 +54,6 @@ run;
 
 /* request the client details */
 %let fname1=%mf_getuniquefileref();
-filename &fname1 TEMP;
 proc http method='POST' out=&fname1
     url='http://localhost/SASLogon/oauth/clients/consul?callback=false&serviceId=app';
     headers "X-Consul-Token"="&consul_token";
@@ -74,7 +73,6 @@ run;
  * register the new client
  */
 %let fname2=%mf_getuniquefileref();
-filename &fname2 TEMP;
 data _null_;
   file &fname2;
   clientid=quote(trim(symget('client_id')));
@@ -91,7 +89,6 @@ data _null_;
 run;
 
 %let fname3=%mf_getuniquefileref();
-filename &fname3 TEMP;
 proc http method='POST' in=&fname2 out=&fname3
     url='http://localhost/SASLogon/oauth/clients';
     headers "Content-Type"="application/json"
