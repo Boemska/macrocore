@@ -47,13 +47,12 @@
 
 options noquotelenmax;
 
+%put &sysmacroname: fetching details for &path ;
 %local fname1;
 %let fname1=%mf_getuniquefileref();
-
-%put &sysmacroname: fetching details for &path ;
 proc http method='GET' out=&fname1
-    url="http://localhost/folders/folders/@item?path=&path";
-    headers "Authorization"="Bearer &&&access_token_var";
+  url="http://localhost/folders/folders/@item?path=&path";
+  headers "Authorization"="Bearer &&&access_token_var";
 run;
 /*data _null_;infile &fname1;input;putlog _infile_;run;*/
 %mf_abort(iftrue=(&SYS_PROCHTTP_STATUS_CODE ne 200)
