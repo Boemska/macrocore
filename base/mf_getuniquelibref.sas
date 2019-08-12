@@ -24,13 +24,16 @@
 
 
 %macro mf_getuniquelibref(prefix=mclib,maxtries=1000);
-  %local x;
+  %local x libref;
   %let x=0;
   %do x=0 %to &maxtries;
   %if %sysfunc(libref(&prefix&x)) ne 0 %then %do;
-      %put &sysmacroname: Libref &prefix&x is available and being returned;
-      &prefix&x
-      %return;
+    %let libref=&prefix&x;
+    %let rc=%sysfunc(libname(&libref,%sysfunc(pathname(work))));
+    %if &rc %then %put %sysfunc(sysmsg());
+    &prefix&x
+    %put &sysmacroname: Libref &libref assigned as WORK and returned;
+    %return;
   %end;
   %end;
   %put unable to find available libref in range &prefix.0-&maxtries;
