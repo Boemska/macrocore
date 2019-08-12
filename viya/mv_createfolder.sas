@@ -86,7 +86,6 @@ options noquotelenmax;
     %put &sysmacroname &newpath not found - creating it now;
     %local fname2;
     %let fname2=%mf_getuniquefileref();
-    filename &fname2 TEMP;
     data _null_;
       length json $1000;
       json=cats("'"
