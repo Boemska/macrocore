@@ -1,13 +1,21 @@
 /**
   @file
   @brief abort gracefully according to context
-  @details Can configure an abort mechanism according to site specific policies
-    or the particulars of an environment.  For instance, can stream custom
+  @details Do not use directly!  See bottom of explanation for details.
+
+   Configures an abort mechanism according to site specific policies or the
+    particulars of an environment.  For instance, can stream custom
     results back to the client in an STP Web App context, or completely stop
     in the case of a batch run.
 
+  For the sharp eyed readers - this is no longer a macro function!! It became
+  a macro procedure during a project and now it's kinda stuck that way until
+  that project is updated (if it's ever updated).  In the meantime we created
+  `mp_abort` which is just a wrapper for this one, and so we recomend you use
+  that for forwards compatibility reasons.
+
   @param mac= to contain the name of the calling macro
-  @param type= enables custom error handling to be configured
+  @param type= deprecated.  Not used.
   @param msg= message to be returned
   @param iftrue= supply a condition under which the macro should be executed.
 
@@ -27,7 +35,7 @@
     %let h54sDebuggingMode=0;
   %end;
   /* Stored Process Server web app context */
-  %if %symexist(_metaperson) %then %do;
+  %if %symexist(_metaperson) or "&SYSPROCESSNAME"="Compute Server" %then %do;
     options obs=max replace nosyntaxcheck mprint;
     /* extract log error / warning, if exist */
     %local logloc logline;
@@ -98,6 +106,11 @@
       rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
+    %if %symexist('SYS_JES_JOB_URI') %then %do;
+      /* refer web service output to file service in one hit */
+      filename _web filesrvc parenturi="&SYS_JES_JOB_URI" name="_webout.json";
+      %let rc=%sysfunc(fcopy(_webout,_web));
+    %end;
     %if %substr(&sysvlong.,8,2)=M2 %then %do;
       /* M2 stp server does not cope well with endsas */
       data _null_;
