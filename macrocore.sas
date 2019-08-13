@@ -17,13 +17,21 @@
 /**
   @file
   @brief abort gracefully according to context
-  @details Can configure an abort mechanism according to site specific policies
-    or the particulars of an environment.  For instance, can stream custom
+  @details Do not use directly!  See bottom of explanation for details.
+
+   Configures an abort mechanism according to site specific policies or the
+    particulars of an environment.  For instance, can stream custom
     results back to the client in an STP Web App context, or completely stop
     in the case of a batch run.
 
+  For the sharp eyed readers - this is no longer a macro function!! It became
+  a macro procedure during a project and now it's kinda stuck that way until
+  that project is updated (if it's ever updated).  In the meantime we created
+  `mp_abort` which is just a wrapper for this one, and so we recomend you use
+  that for forwards compatibility reasons.
+
   @param mac= to contain the name of the calling macro
-  @param type= enables custom error handling to be configured
+  @param type= deprecated.  Not used.
   @param msg= message to be returned
   @param iftrue= supply a condition under which the macro should be executed.
 
@@ -43,7 +51,7 @@
     %let h54sDebuggingMode=0;
   %end;
   /* Stored Process Server web app context */
-  %if %symexist(_metaperson) %then %do;
+  %if %symexist(_metaperson) or "&SYSPROCESSNAME"="Compute Server" %then %do;
     options obs=max replace nosyntaxcheck mprint;
     /* extract log error / warning, if exist */
     %local logloc logline;
@@ -114,6 +122,11 @@
       rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
+    %if %symexist('SYS_JES_JOB_URI') %then %do;
+      /* refer web service output to file service in one hit */
+      filename _web filesrvc parenturi="&SYS_JES_JOB_URI" name="_webout.json";
+      %let rc=%sysfunc(fcopy(_webout,_web));
+    %end;
     %if %substr(&sysvlong.,8,2)=M2 %then %do;
       /* M2 stp server does not cope well with endsas */
       data _null_;
@@ -1155,6 +1168,35 @@ Usage:
 
 %mend;
 
+/**
+  @file
+  @brief abort gracefully according to context
+  @details Configures an abort mechanism according to site specific policies or
+    the particulars of an environment.  For instance, can stream custom
+    results back to the client in an STP Web App context, or completely stop
+    in the case of a batch run.
+
+  For the sharp eyed among you - the mf_abort macro became a macro procedure
+  during a project and became kinda stuck that way.  In the meantime we created
+  this wrapper, and recommend you use it (over mf_abort directly) for forwards
+  compatibility reasons.
+
+  @param mac= to contain the name of the calling macro
+  @param msg= message to be returned
+  @param iftrue= supply a condition under which the macro should be executed.
+
+  @version 9.2
+  @author Allan Bowe
+**/
+
+%macro mp_abort(mac=mp_abort.sas, type=, msg=, iftrue=%str(1=1)
+)/*/STORE SOURCE*/;
+
+  %if not(%eval(%unquote(&iftrue))) %then %return;
+
+  %mf_abort(mac=&mac, msg=%superq(msg))
+
+%mend;
 /**
   @file
   @brief Copy any file using binary input / output streams
@@ -5505,23 +5547,26 @@ libname &libref2 clear;
 %mend;/**
   @file mv_createwebservice.sas
   @brief Creates a JobExecution object if it doesn't already exist
-  @details Expects oauth token in a global macro variable (default
-    ACCESS_TOKEN).
+  @details For efficiency this macro creates a service that writes to a
+    temporary _webout location that is then copied to the Files service at the
+    end.  THIS MEANS YOU MUST USE THE MOD OPTION when writing to _webout.
 
     options mprint;
     filename mycode temp;
     data _null_;
       file mycode;
-      put "data;file _webout; put 'Hello, wurrld';run;";
+      put "data;file _webout MOD; put 'Hello, wurrld';run;";
     run;
     %mv_createwebservice(path=/Public, name=testJob, precode=mycode)
 
-  for more info: https://developer.sas.com/apis/rest/Compute/#create-a-job-definition
+  Expects oauth token in a global macro variable (default ACCESS_TOKEN).
+  For more info: https://developer.sas.com/apis/rest/Compute/#create-a-job-definition
 
   @param path= The full path where the service will be created
   @param name= The name of the service
   @param desc= The description of the service
-  @param precode= FILEREF of code to be attached to the beginning of the service
+  @param precode= Space separated list of filerefs, pointing to the code that
+    needs to be attached to the beginning of the service
   @param access_token_var= The global macro variable to contain the access token
   @param grant_type= valid values are "password" or "authorization_code" (unquoted).
     The default is authorization_code.
@@ -5622,6 +5667,7 @@ run;
   ,msg=%str(Job &name already exists in &path)
 )
 
+/* set up the body of the request to create the service */
 %local fname3;
 %let fname3=%mf_getuniquefileref();
 data _null_;
@@ -5632,20 +5678,57 @@ data _null_;
     ,',"type":"CHARACTER","defaultValue":"false"}]'
     ,',"code":"');
   put string @@;
-  put 'filename _webout temp;';
+  put '\rfilename _webout temp;';
 run;
 
-data _null_;
-  infile &precode;
-  file &fname3 TERMSTR=' ' mod;
-  input;
-  put _infile_;
-run;
+/* insert the code, escaping double quotes and carriage returns */
+%local x fref;
+%do x=1 %to %sysfunc(countw(&precode));
+  %let fref=%scan(&precode,&x);
+  data _null_;
+  length filein 8 fileid 8;
+  filein = fopen("&fref","I",1,"B");
+  fileid = fopen("&fname3","A",1,"B");
+  rec = "20"x;
+  do while(fread(filein)=0);
+    rc = fget(filein,rec,1);
+    if rec='"' then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'"');rc =fwrite(fileid);
+    end;
+    else if rec='0A'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'r');rc =fwrite(fileid);
+    end;
+    else if rec='0D'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'n');rc =fwrite(fileid);
+    end;
+    else if rec='09'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'t');rc =fwrite(fileid);
+    end;
+    else if rec='5C'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+    end;
+    else do;
+      rc =fput(fileid,rec);
+      rc =fwrite(fileid);
+    end;
+  end;
+  getout:
+  rc=fclose(filein);
+  rc=fclose(fileid);
+  run;
+%end;
 
+/* finish off the body */
 data _null_;
   file &fname3 mod TERMSTR=' ';
-  put 'filename _web filesrvc parenturi=\"&SYS_JES_JOB_URI\" name=\"_webout.htm\";' @@;
-  put '%let rc=%sysfunc(fcopy(_webout,_web)); %put &=rc;' @@;
+  /* switched from .htm */
+  put '\rfilename _web filesrvc parenturi=\"&SYS_JES_JOB_URI\" name=\"_webout.json\";' @@;
+  put '\r%let rc=%sysfunc(fcopy(_webout,_web));' @@;
   put '"}';
 run;
 
@@ -5665,18 +5748,15 @@ data _null_;infile &fname4;input;putlog _infile_;run;
   ,mac=&sysmacroname
   ,msg=%str(&SYS_PROCHTTP_STATUS_CODE &SYS_PROCHTTP_STATUS_PHRASE)
 )
-
-%put &sysmacroname: Job &name successfully created in &path;
-
-
 /* clear refs */
-
 filename &fname1 clear;
 filename &fname2 clear;
 filename &fname3 clear;
 filename &fname4 clear;
 libname &libref1 clear;
 libname &libref2 clear;
+
+%put &sysmacroname: Job &name successfully created in &path;
 
 %mend;/**
   @file mv_deleteviyafolder.sas

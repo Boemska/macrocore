@@ -1,23 +1,26 @@
 /**
   @file mv_createwebservice.sas
   @brief Creates a JobExecution object if it doesn't already exist
-  @details Expects oauth token in a global macro variable (default
-    ACCESS_TOKEN).
+  @details For efficiency this macro creates a service that writes to a
+    temporary _webout location that is then copied to the Files service at the
+    end.  THIS MEANS YOU MUST USE THE MOD OPTION when writing to _webout.
 
     options mprint;
     filename mycode temp;
     data _null_;
       file mycode;
-      put "data;file _webout; put 'Hello, wurrld';run;";
+      put "data;file _webout MOD; put 'Hello, wurrld';run;";
     run;
     %mv_createwebservice(path=/Public, name=testJob, precode=mycode)
 
-  for more info: https://developer.sas.com/apis/rest/Compute/#create-a-job-definition
+  Expects oauth token in a global macro variable (default ACCESS_TOKEN).
+  For more info: https://developer.sas.com/apis/rest/Compute/#create-a-job-definition
 
   @param path= The full path where the service will be created
   @param name= The name of the service
   @param desc= The description of the service
-  @param precode= FILEREF of code to be attached to the beginning of the service
+  @param precode= Space separated list of filerefs, pointing to the code that
+    needs to be attached to the beginning of the service
   @param access_token_var= The global macro variable to contain the access token
   @param grant_type= valid values are "password" or "authorization_code" (unquoted).
     The default is authorization_code.
@@ -118,6 +121,7 @@ run;
   ,msg=%str(Job &name already exists in &path)
 )
 
+/* set up the body of the request to create the service */
 %local fname3;
 %let fname3=%mf_getuniquefileref();
 data _null_;
@@ -128,20 +132,57 @@ data _null_;
     ,',"type":"CHARACTER","defaultValue":"false"}]'
     ,',"code":"');
   put string @@;
-  put 'filename _webout temp;';
+  put '\rfilename _webout temp;';
 run;
 
-data _null_;
-  infile &precode;
-  file &fname3 TERMSTR=' ' mod;
-  input;
-  put _infile_;
-run;
+/* insert the code, escaping double quotes and carriage returns */
+%local x fref;
+%do x=1 %to %sysfunc(countw(&precode));
+  %let fref=%scan(&precode,&x);
+  data _null_;
+  length filein 8 fileid 8;
+  filein = fopen("&fref","I",1,"B");
+  fileid = fopen("&fname3","A",1,"B");
+  rec = "20"x;
+  do while(fread(filein)=0);
+    rc = fget(filein,rec,1);
+    if rec='"' then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'"');rc =fwrite(fileid);
+    end;
+    else if rec='0A'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'r');rc =fwrite(fileid);
+    end;
+    else if rec='0D'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'n');rc =fwrite(fileid);
+    end;
+    else if rec='09'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'t');rc =fwrite(fileid);
+    end;
+    else if rec='5C'x then do;
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+      rc =fput(fileid,'\');rc =fwrite(fileid);
+    end;
+    else do;
+      rc =fput(fileid,rec);
+      rc =fwrite(fileid);
+    end;
+  end;
+  getout:
+  rc=fclose(filein);
+  rc=fclose(fileid);
+  run;
+%end;
 
+/* finish off the body */
 data _null_;
   file &fname3 mod TERMSTR=' ';
-  put 'filename _web filesrvc parenturi=\"&SYS_JES_JOB_URI\" name=\"_webout.htm\";' @@;
-  put '%let rc=%sysfunc(fcopy(_webout,_web)); %put &=rc;' @@;
+  /* switched from .htm */
+  put '\rfilename _web filesrvc parenturi=\"&SYS_JES_JOB_URI\" name=\"_webout.json\";' @@;
+  put '\r%let rc=%sysfunc(fcopy(_webout,_web));' @@;
   put '"}';
 run;
 
@@ -161,17 +202,14 @@ data _null_;infile &fname4;input;putlog _infile_;run;
   ,mac=&sysmacroname
   ,msg=%str(&SYS_PROCHTTP_STATUS_CODE &SYS_PROCHTTP_STATUS_PHRASE)
 )
-
-%put &sysmacroname: Job &name successfully created in &path;
-
-
 /* clear refs */
-
 filename &fname1 clear;
 filename &fname2 clear;
 filename &fname3 clear;
 filename &fname4 clear;
 libname &libref1 clear;
 libname &libref2 clear;
+
+%put &sysmacroname: Job &name successfully created in &path;
 
 %mend;
