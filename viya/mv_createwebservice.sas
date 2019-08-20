@@ -11,7 +11,7 @@
       file mycode;
       put "data;file _webout MOD; put 'Hello, wurrld';run;";
     run;
-    %mv_createwebservice(path=/Public, name=testJob, precode=mycode)
+    %mv_createwebservice(path=/Public, name=testJob, code=mycode)
 
   Expects oauth token in a global macro variable (default ACCESS_TOKEN).
   For more info: https://developer.sas.com/apis/rest/Compute/#create-a-job-definition
@@ -21,6 +21,7 @@
   @param desc= The description of the service
   @param precode= Space separated list of filerefs, pointing to the code that
     needs to be attached to the beginning of the service
+  @param code= Fileref(s) of the actual code to be added
   @param access_token_var= The global macro variable to contain the access token
   @param grant_type= valid values are "password" or "authorization_code" (unquoted).
     The default is authorization_code.
@@ -42,6 +43,7 @@
     ,name=
     ,desc=Created by the mv_createwebservice.sas macro
     ,precode=
+    ,code=
     ,access_token_var=ACCESS_TOKEN
     ,grant_type=authorization_code
   );
@@ -64,6 +66,10 @@
 )
 
 options noquotelenmax;
+
+/* ensure folder exists */
+%put &sysmacroname: Path &path being checked / created;
+%mv_createfolder(path=&path)
 
 /* fetching folder details for provided path */
 %local fname1;
@@ -137,8 +143,8 @@ run;
 
 /* insert the code, escaping double quotes and carriage returns */
 %local x fref;
-%do x=1 %to %sysfunc(countw(&precode));
-  %let fref=%scan(&precode,&x);
+%do x=1 %to %sysfunc(countw(&precode &code));
+  %let fref=%scan(&precode &code,&x);
   data _null_;
   length filein 8 fileid 8;
   filein = fopen("&fref","I",1,"B");
