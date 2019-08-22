@@ -123,13 +123,11 @@ options noquotelenmax;
       if rel='createChild' then
         call symputx('href',quote(trim(href)),'l');
     run;
+
+    libname &libref2 clear;
+    filename &fname2 clear;
   %end;
-
+  filename &fname1 clear;
+  libname &libref1 clear;
 %end;
-/* clear refs */
-filename &fname1 clear;
-filename &fname2 clear;
-libname &libref1 clear;
-libname &libref2 clear;
-
 %mend;
