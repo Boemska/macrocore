@@ -54,11 +54,16 @@ proc http method='GET' out=&fname1
   url="http://localhost/folders/folders/@item?path=&path";
   headers "Authorization"="Bearer &&&access_token_var";
 run;
-/*data _null_;infile &fname1;input;putlog _infile_;run;*/
-%mf_abort(iftrue=(&SYS_PROCHTTP_STATUS_CODE ne 200)
-  ,mac=&sysmacroname
-  ,msg=%str(&SYS_PROCHTTP_STATUS_CODE &SYS_PROCHTTP_STATUS_PHRASE)
-)
+%if &SYS_PROCHTTP_STATUS_CODE=404 %then %do;
+  %put &sysmacroname: Folder &path NOT FOUND - nothing to delete!;
+  %return;
+%end;
+%else %if &SYS_PROCHTTP_STATUS_CODE ne 200 %then %do;
+  /*data _null_;infile &fname1;input;putlog _infile_;run;*/
+  %mf_abort(mac=&sysmacroname
+    ,msg=%str(&SYS_PROCHTTP_STATUS_CODE &SYS_PROCHTTP_STATUS_PHRASE)
+  )
+%end;
 
 %put &sysmacroname: grab the follow on link ;
 %local libref1;
