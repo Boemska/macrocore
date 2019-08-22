@@ -5600,15 +5600,13 @@ options noquotelenmax;
       if rel='createChild' then
         call symputx('href',quote(trim(href)),'l');
     run;
+
+    libname &libref2 clear;
+    filename &fname2 clear;
   %end;
-
+  filename &fname1 clear;
+  libname &libref1 clear;
 %end;
-/* clear refs */
-filename &fname1 clear;
-filename &fname2 clear;
-libname &libref1 clear;
-libname &libref2 clear;
-
 %mend;/**
   @file mv_createwebservice.sas
   @brief Creates a JobExecution object if it doesn't already exist
@@ -5899,6 +5897,29 @@ data _null_;
   set &libref1..links;
   if rel='deleteRecursively' then
     call symputx('href',quote(trim(href)),'l');
+  else if rel='members' then
+    call symputx('mref',quote(cats(href,'?recursive=true')),'l');
+run;
+
+/* before we can delete the folder, we need to delete the children */
+%local fname1a;
+%let fname1a=%mf_getuniquefileref();
+proc http method='GET' out=&fname1a
+  url=%unquote(%superq(mref));
+  headers "Authorization"="Bearer &&&access_token_var";
+run;
+%put &=SYS_PROCHTTP_STATUS_CODE;
+%local libref1a;
+%let libref1a=%mf_getuniquelibref();
+libname &libref1a JSON fileref=&fname1a;
+
+data _null_;
+  set &libref1a..items_links;
+  if href=:'/folders/folders' then return;
+  if rel='deleteResource' then
+    call execute('proc http method="DELETE" url='!!quote(trim(href))
+    !!'; headers "Authorization"="Bearer &&&access_token_var" '
+    !!' "Accept"="*/*";run; /**/');
 run;
 
 %put &sysmacroname: perform the delete operation ;
@@ -5910,13 +5931,13 @@ proc http method='DELETE'
     headers "Authorization"="Bearer &&&access_token_var"
             'Accept'='*/*'; /**/
 run;
-
-%mf_abort(iftrue=(&SYS_PROCHTTP_STATUS_CODE ne 204)
-  ,mac=&sysmacroname
-  ,msg=%str(&SYS_PROCHTTP_STATUS_CODE &SYS_PROCHTTP_STATUS_PHRASE)
-)
-
-%put &sysmacroname: &path successfully deleted;
+%if &SYS_PROCHTTP_STATUS_CODE ne 204 %then %do;
+  data _null_; infile &fname2; input; putlog _infile_;run;
+  %mf_abort(mac=&sysmacroname
+    ,msg=%str(&SYS_PROCHTTP_STATUS_CODE &SYS_PROCHTTP_STATUS_PHRASE)
+  )
+%end;
+%else %put &sysmacroname: &path successfully deleted;
 
 /* clear refs */
 filename &fname1 clear;
