@@ -177,7 +177,6 @@ run;
       rc =fwrite(fileid);
     end;
   end;
-  getout:
   rc=fclose(filein);
   rc=fclose(fileid);
   run;
