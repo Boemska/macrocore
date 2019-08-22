@@ -2120,6 +2120,71 @@ proc sql;
   run;
 %end;
 %mend;/**
+  @file mp_unzip.sas
+  @brief Unzips a zip file
+  @details Opens the zip file and copies all the contents to another directory.
+    It is not possible to retain permissions / timestamps, also the BOF marker
+    is lost so it cannot extract binary files.
+
+    Usage:
+
+      filename mc url "https://raw.githubusercontent.com/Boemska/macrocore/master/macrocore.sas";
+      %inc mc;
+
+      %mp_unzip(ziploc="/some/file.zip",outdir=/some/folder)
+
+  <h4> Dependencies </h4>
+  @li mf_mkdir.sas
+  @li mf_getuniquefileref.sas
+
+  @param ziploc= fileref or quoted full path to zip file ("/path/to/file.zip")
+  @param outdir= directory in which to write the outputs (created if non existant)
+
+  @version 9.4
+  @author Allan Bowe
+  @source https://github.com/Boemska/macrocore
+
+**/
+
+%macro mp_unzip(
+  ziploc=
+  ,outdir=%sysfunc(pathname(work))
+)/*/STORE SOURCE*/;
+
+%local fname1 fname2 fname3;
+%let fname1=%mf_getuniquefileref();
+%let fname2=%mf_getuniquefileref();
+%let fname3=%mf_getuniquefileref();
+
+filename &fname1 ZIP &ziploc; * Macro variable &datazip would be read from the file*;
+
+/* Read the "members" (files) from the ZIP file */
+data _data_(keep=memname isFolder);
+  length memname $200 isFolder 8;
+  fid=dopen("&fname1");
+  if fid=0 then stop;
+  memcount=dnum(fid);
+  do i=1 to memcount;
+    memname=dread(fid,i);
+    /* check for trailing / in folder name */
+    isFolder = (first(reverse(trim(memname)))='/');
+    output;
+  end;
+  rc=dclose(fid);
+run;
+filename &fname1 clear;
+
+/* loop through each entry and either create the subfolder or extract member */
+data _null_;
+  set &syslast;
+  if isFolder then call execute('%mf_mkdir(&outdir/'!!memname!!')');
+  else call execute('filename &fname2 zip &ziploc member='
+    !!quote(trim(memname))!!';filename &fname3 "&outdir/'
+    !!trim(memname)!!'";data _null_; rc=fcopy("&fname2","&fname3");run;'
+    !!'filename &fname2 clear; filename &fname3 clear;');
+run;
+
+%mend;/**
   @file
   @brief Creates a zip file
   @details For DIRECTORY usage, will ignore subfolders. For DATASET usage,
@@ -5557,7 +5622,7 @@ libname &libref2 clear;
       file mycode;
       put "data;file _webout MOD; put 'Hello, wurrld';run;";
     run;
-    %mv_createwebservice(path=/Public, name=testJob, precode=mycode)
+    %mv_createwebservice(path=/Public, name=testJob, code=mycode)
 
   Expects oauth token in a global macro variable (default ACCESS_TOKEN).
   For more info: https://developer.sas.com/apis/rest/Compute/#create-a-job-definition
@@ -5567,6 +5632,7 @@ libname &libref2 clear;
   @param desc= The description of the service
   @param precode= Space separated list of filerefs, pointing to the code that
     needs to be attached to the beginning of the service
+  @param code= Fileref(s) of the actual code to be added
   @param access_token_var= The global macro variable to contain the access token
   @param grant_type= valid values are "password" or "authorization_code" (unquoted).
     The default is authorization_code.
@@ -5588,6 +5654,7 @@ libname &libref2 clear;
     ,name=
     ,desc=Created by the mv_createwebservice.sas macro
     ,precode=
+    ,code=
     ,access_token_var=ACCESS_TOKEN
     ,grant_type=authorization_code
   );
@@ -5610,6 +5677,10 @@ libname &libref2 clear;
 )
 
 options noquotelenmax;
+
+/* ensure folder exists */
+%put &sysmacroname: Path &path being checked / created;
+%mv_createfolder(path=&path)
 
 /* fetching folder details for provided path */
 %local fname1;
@@ -5683,8 +5754,8 @@ run;
 
 /* insert the code, escaping double quotes and carriage returns */
 %local x fref;
-%do x=1 %to %sysfunc(countw(&precode));
-  %let fref=%scan(&precode,&x);
+%do x=1 %to %sysfunc(countw(&precode &code));
+  %let fref=%scan(&precode &code,&x);
   data _null_;
   length filein 8 fileid 8;
   filein = fopen("&fref","I",1,"B");
