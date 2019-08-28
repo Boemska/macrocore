@@ -117,7 +117,9 @@
         abort cancel 0 nolist;
       run;
     %end;
-    endsas;
+    %else  %do;
+      endsas;
+    %end;
   %end;
 
   %put _all_;
