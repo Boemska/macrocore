@@ -119,7 +119,6 @@
       put '"sasDatetime" : ' sasdatetime ',';
       put '"status" : "success"}';
       if debug=131 then put "--h54s-data-end--";
-      rc = stpsrvset('program error', 0);
     run;
     %let syscc=0;
     %if %symexist('SYS_JES_JOB_URI') %then %do;
@@ -127,19 +126,28 @@
       filename _webout filesrvc parenturi="&SYS_JES_JOB_URI" name="_webout.json";
       %let rc=%sysfunc(fcopy(_web,_webout));
     %end;
-    %if %substr(&sysvlong.,8,2)=M2 %then %do;
-      /* M2 stp server does not cope well with endsas */
+    %else %do;
       data _null_;
-        abort cancel 0 nolist;
+        rc=stpsrvset('program error', 0);
       run;
     %end;
-    %else  %do;
-      endsas;
-    %end;
+    /**
+     * endsas is reliable but kills some deployments.
+     * Abort variants are ungraceful (non zero return code)
+     * This approach lets SAS run silently until the end :-)
+     */
+    %put _all_;
+    filename skip temp;
+    data _null_;
+      file skip;
+      put '%macro skippy();';
+    run;
+    %inc skip;
   %end;
-
-  %put _all_;
-  %abort cancel;
+  %else %do;
+    %put _all_;
+    %abort cancel;
+  %end;
 %mend;
 /**
   @file
