@@ -5797,9 +5797,10 @@ run;
 /* finish off the body */
 data _null_;
   file &fname3 mod TERMSTR=' ';
-  /* switched from .htm */
+  /*
   put '\rfilename _web filesrvc parenturi=\"&SYS_JES_JOB_URI\" name=\"_webout.json\";' @@;
   put '\r%let rc=%sysfunc(fcopy(_webout,_web));' @@;
+  */
   put '"}';
 run;
 
