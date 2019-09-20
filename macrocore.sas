@@ -2732,6 +2732,32 @@ run;
       &user &password;
   %end;
 %end;
+%else %if &engine=ORACLE %then %do;
+  %put NOTE: Obtaining &engine library details;
+  data _null;
+    length assocuri1 assocuri2 assocuri3 authdomain path schema $256;
+    call missing (of _all_);
+
+    /* get auth domain */
+    rc=metadata_getnasn("&liburi",'LibraryConnection',1,assocuri1);
+    rc=metadata_getnasn(assocuri1,'Domain',1,assocuri2);
+    rc=metadata_getattr(assocuri2,"Name",authdomain);
+    call symputx('authdomain',authdomain,'l');
+
+    /* path */
+    rc=metadata_getprop(assocuri1,'Connection.Oracle.Property.PATH.Name.xmlKey.txt',path);
+    call symputx('path',path,'l');
+
+    /* schema */
+    rc=metadata_getnasn("&liburi",'UsingPackages',1,assocuri3);
+    rc=metadata_getattr(assocuri3,'SchemaName',schema);
+    call symputx('schema',schema,'l');
+  run;
+  %put NOTE: Executing the following:/; %put NOTE-;
+  %put NOTE- libname &libref ORACLE path=&path schema=&schema authdomain=&authdomain;
+  %put NOTE-;
+  libname &libref ORACLE path=&path schema=&schema authdomain=&authdomain;
+%end;
 %else %if &engine= %then %do;
   %put NOTE: Libref &libref is not registered in metadata;
   %&mAbort.mf_abort(
@@ -2746,7 +2772,6 @@ run;
 %end;
 
 %mend;
-
 /**
   @file
   @brief Assigns a meta engine library using LIBREF
