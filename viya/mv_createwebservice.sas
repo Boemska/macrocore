@@ -137,8 +137,7 @@ data _null_;
   	,'","type":"Compute","parameters":[{"name":"_addjesbeginendmacros"'
     ,',"type":"CHARACTER","defaultValue":"false"}]'
     ,',"code":"');
-  put string @@;
-  put '\rfilename _webout temp;';
+  put string;
 run;
 
 /* insert the code, escaping double quotes and carriage returns */
