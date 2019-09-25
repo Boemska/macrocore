@@ -31,7 +31,7 @@
       * create the stored process ;
       %mm_createwebservice(service=MyNewSTP
         ,role=common
-        ,project=/User Folders/sasdemo/myapp
+        ,project=/User Folders/&sysuserid/My Folder/myProj
         ,source=%sysfunc(pathname(work))/somefile.sas
       )
 
