@@ -1,9 +1,22 @@
 /**
   @file mv_createwebservice.sas
   @brief Creates a JobExecution object if it doesn't already exist
-  @details For efficiency this macro creates a service that writes to a
-    temporary _webout location that is then copied to the Files service at the
-    end.  THIS MEANS YOU MUST USE THE MOD OPTION when writing to _webout.
+  @details For efficiency, minimise the number of calls to _webout.  In Viya this
+    is stored in a database before being sent to the browser, so it's better to
+    write it elsewhere and then send it all in one go.
+
+  To use this macro, a refresh token is needed.  See:
+
+    %let client=someclient;
+    %let secret=MySecret;
+    %mv_getapptoken(client_id=&client,client_secret=&secret)
+
+  Navigate to the url and paste the access code below
+
+    %mv_getrefreshtoken(client_id=&client,client_secret=&secret,code=wKDZYTEPK6)
+    %mv_getaccesstoken(client_id=&client,client_secret=&secret)
+
+  Now we can create some code and add it to a web service
 
     options mprint;
     filename mycode temp;
@@ -13,8 +26,6 @@
     run;
     %mv_createwebservice(path=/Public, name=testJob, code=mycode)
 
-  Expects oauth token in a global macro variable (default ACCESS_TOKEN).
-  For more info: https://developer.sas.com/apis/rest/Compute/#create-a-job-definition
 
   @param path= The full path where the service will be created
   @param name= The name of the service

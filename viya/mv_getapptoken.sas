@@ -79,7 +79,7 @@ data _null_;
   clientsecret=quote(trim(symget('client_secret')));
   granttype=quote(trim(symget('grant_type')));
   put '{"client_id":' clientid ',"client_secret":' clientsecret
-    ',"scope":"openid","authorized_grant_types": [' granttype ',"refresh_token"],'
+    ',"scope":["openid","*"],"authorized_grant_types": [' granttype ',"refresh_token"],'
     '"redirect_uri": "urn:ietf:wg:oauth:2.0:oob"}';
 run;
 data _null_;
